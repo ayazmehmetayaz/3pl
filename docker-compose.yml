@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: ayaz-postgres
+    environment:
+      POSTGRES_DB: ayaz_erp
+      POSTGRES_USER: ayaz_user
+      POSTGRES_PASSWORD: ayaz_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - ayaz-network
+
+  redis:
+    image: redis:6-alpine
+    container_name: ayaz-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ayaz-network
+
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    container_name: ayaz-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ayaz_user
+      RABBITMQ_DEFAULT_PASS: ayaz_password
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - ayaz-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: ayaz-minio
+    environment:
+      MINIO_ROOT_USER: ayaz_user
+      MINIO_ROOT_PASSWORD: ayaz_password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - ayaz-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  minio_data:
+
+networks:
+  ayaz-network:
+    driver: bridge

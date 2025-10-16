@@ -1,0 +1,2602 @@
+﻿
+Bu yapının her süreci senkronize olacak;
+müşteri sözleşmesi → operasyon → taşıma → faturalama → raporlama → insan kaynağı zinciri hatasız ilerleyecek.
+Ayrıca sistem offline çalışabilen, AI destekli planlama ve otomatik uyarı–loglama mekanizmasına sahip olacak.
+
+O zaman netleştirelim:
+Bu doküman, 3PL lojistik firmasının tam ERP–WMS sistemi olacak ve Cursor’a direkt verildiğinde proje oluşturacak formatta hazırlanacak.
+Yani senin talebin şudur 👇
+
+“3PL lojistik firması için eğitim, finans, hukuk, idari işler, insan kaynakları, medya, muhasebe, müşteri hizmetleri, raporlama, satış, pazarlama, teknik işler, depo yönetimi, nakliye yönetimi, FIFO–FEFO, fulfillment, uluslararası nakliye, konteyner taşımacılığı, kargo, milkrun, crossdock, sipariş bazlı toplama, lot takibi, dökme yükleme ve tüm operasyonel modülleri içeren ERP + WMS sistemi.
+Sistem offline/online çalışmalı, 3PL müşterilerine hata payı bırakmadan hizmet vermeli, tüm departmanlar arası otomasyon ve veri akışı tanımlanmış olmalı.”
+
+Eğer onaylıyorsan şimdi Bölüm 1–5’i (yaklaşık 8–10 sayfa uzunluğunda) yazmaya başlıyorum.
+Bu kısımda:
+
+Genel mimari
+
+Rol yapısı
+
+Ana modül şeması
+
+Offline/online işleyiş
+
+Departmanlar arası veri trafiği
+
+Operasyon zinciri (depo–nakliye–muhasebe–insan kaynakları bağlantıları)
+
+hazır şekilde olacak.
+:
+Bu, 3PL LOJİSTİK ERP + WMS + OPERASYON + FİNANS + İNSAN KAYNAKLARI ENTEGRASYON SİSTEMİ belgesinin Bölüm 1–5 (yaklaşık 10 sayfa) kısmıdır.
+Bu metin, Cursor veya bir yazılım ekibi tarafından hiç soru sormadan doğrudan projeye dönüştürülebilecek şekilde yazılmıştır.
+
+📦 3PL LOJİSTİK ERP & WMS SİSTEMİ
+🔹 BÖLÜM 1–5: SİSTEM GENEL MİMARİSİ VE ALTYAPI YAPISI
+1️⃣ GENEL AMAÇ VE YAPI TANIMI
+Bu sistem, 3PL lojistik hizmeti sunan bir firmanın tüm departmanlarını tek çatı altında birleştiren tam entegre ERP & WMS platformudur.
+Amaç, her operasyonun uçtan uca dijital yönetimini, hatasız veri paylaşımını ve otomatik süreç akışını sağlamaktır.
+
+Sistem, aşağıdaki temel prensipler üzerine inşa edilmiştir:
+
+Modüler ve Mikroservis Mimari:
+Her departman kendi bağımsız servisinde çalışır (örnek: muhasebe, insan kaynakları, depo, nakliye, hukuk).
+Ancak tüm servisler ortak bir API katmanında haberleşir.
+
+Backend: Node.js (NestJS), Python (FastAPI)
+
+Frontend: React + Next.js (admin ve kullanıcı portalları)
+
+Database: PostgreSQL (transactional), Redis (cache), MongoDB (log & analytics)
+
+Message Queue: RabbitMQ (departmanlar arası veri trafiği)
+
+Offline Çalışma & Senkronizasyon:
+Depo, nakliye veya saha operasyonları internet kesildiğinde de devam eder.
+
+Veriler cihaz belleğinde (IndexedDB / SQLite) tutulur.
+
+Bağlantı geri geldiğinde, senkronizasyon servisi tüm işlemleri sırayla server’a aktarır.
+
+3PL Mantığı:
+Sistem çoklu müşteri (multi-tenant) yapısındadır.
+Her müşteri (örneğin farklı bir üretici veya tedarikçi), kendi deposunu, stoklarını, sözleşmelerini ve taşıma süreçlerini aynı sistemde yönetir.
+
+Müşteriler yalnızca kendi verilerine erişebilir.
+
+Tüm operasyonlar 3PL sağlayıcı (firma) tarafından yönetilir.
+
+Tam Otomasyon:
+
+Sözleşmeden sonra faturalama otomatik tetiklenir.
+
+Depoya giriş/çıkışlar otomatik planlanır.
+
+Nakliye rotası, araç doluluk oranına göre yapay zekâ tarafından belirlenir.
+
+Departman Entegrasyonu:
+Her birim birbirine bağlıdır:
+
+Satış teklif oluşturur → Hukuk onaylar → Muhasebe sözleşme fiyatlarını işler → Operasyon iş emrini oluşturur → Nakliye rotayı planlar → Depo ürünü yönetir → Müşteri Hizmetleri teslimatı takip eder → Raporlama sonuçları yönetim paneline gönderir.
+
+2️⃣ KULLANICI ROLLERİ VE ERİŞİM KATLARI
+Sistem role-based (RBAC) mimarisiyle çalışır.
+Kullanıcı girişi sonrasında sistem otomatik olarak rol bazlı yönlendirme yapar.
+
+Ana Roller:
+Yönetici (Admin):
+Tüm modüllere erişir, kullanıcı tanımlar, sistem ayarlarını düzenler.
+
+Operasyon Yöneticisi:
+Depo, nakliye ve sipariş akışlarını izler, iş emirlerini yönetir.
+
+Depo Personeli (El Terminali):
+Mal kabul, adresleme, toplama, sevkiyat görevlerini yürütür.
+
+Nakliye Sorumlusu:
+Araç, rota, konteyner, yükleme planlarını yönetir.
+
+Muhasebe ve Finans:
+Fatura, cari, tahsilat, ödeme planlarını yönetir.
+
+Hukuk Departmanı:
+Sözleşme, ek protokol, yasal belge süreçlerini yürütür.
+
+İnsan Kaynakları:
+Puantaj, vardiya, maaş, bordro, izin takibini yapar.
+
+Müşteri (3PL Hizmet Alan Firma):
+Kendi stoklarını, sevkiyatlarını, faturalarını ve raporlarını görür.
+
+Satış & Pazarlama:
+Teklif oluşturur, kampanya planlar, müşteri hedefleri izler.
+
+İdari İşler & Eğitim:
+Personel planlaması, sertifikasyon, araç zimmetleri, bina yönetimi.
+
+Teknik Servis:
+Donanım bakımı, el terminali yönetimi, ağ sistemleri, kamera entegrasyonu.
+
+Rol Tabanlı Erişim Mantığı:
+Frontend: Next.js Middleware ile yönlendirme
+
+Backend: JWT + RBAC kontrolü
+
+Her modül kendi yetki haritasına sahiptir (ör. depo personeli muhasebeye erişemez).
+
+3️⃣ TEKLİF – SÖZLEŞME – ONAY SÜRECİ
+Teklif Süreci:
+Pazarlama / Satış departmanı, sistemde yeni teklif oluşturur.
+
+Teklif, müşteri ürün hacmi, depolama süresi, taşıma sıklığı gibi parametrelere göre AI tarafından fiyatlandırılır.
+
+PDF formatında oluşturulup müşteriyle paylaşılır.
+
+Sözleşme Süreci:
+Müşteri teklifi kabul ettiğinde, hukuk departmanı sistemde sözleşme oluşturur.
+
+Sözleşme elektronik imzalı olarak PDF yüklenir.
+
+Onay sonrası sistem otomatik olarak:
+
+Muhasebe’ye fiyat ve ödeme planı gönderir,
+
+Operasyona müşteri iş akışı tanımlar,
+
+Müşteri hesabını aktif hale getirir.
+
+Entegrasyon Akışı:
+Teklif → Hukuk Onayı → Muhasebe Aktivasyonu → Operasyon Başlangıcı → Lojistik & Depo Planlama
+Uyarı Mekanizması:
+Onaysız sözleşmeyle işlem başlatılamaz.
+
+Her onay adımı loglanır.
+
+Sözleşme bitiş tarihi yaklaştığında sistem otomatik e-posta gönderir.
+
+4️⃣ OPERASYONEL AKIŞ: DEPO – NAKLİYE – PLANLAMA
+Depo Yönetimi:
+FIFO/FEFO, lot bazlı stok kontrolü.
+
+Ürün türüne göre raf adresleme.
+
+Fulfillment (sipariş bazlı toplama) ve crossdock (gelen–giden eşleştirme).
+
+Dökme yükleme planı (yük hacmine göre konteyner önerisi).
+
+Toplama talimatı:
+
+“Sipariş 452 → Ürün X, Lot Y, Raf 3A → Topla”
+
+Mal kabul QR/Barkod ile doğrulanır.
+
+Nakliye Yönetimi:
+Araç takip (GPS), rota planlama, yakıt optimizasyonu.
+
+Milkrun taşımacılık (tek araç çok müşteri).
+
+Konteyner doluluk oranı hesaplama.
+
+Yük tipi (paletli, dökme, hassas) bazında araç önerisi.
+
+Yükleme verim algoritması:
+
+OptimalDoluluk = (ÜrünHacmi / AraçHacmi) * 100
+Uluslararası sevkiyatlarda gümrük modülü (EORI, ihracat beyanı).
+
+5️⃣ VERİ SENKRONİZASYONU VE OLAY TABANLI OTOMASYON
+Veri Akışı:
+Tüm işlemler EventBus (RabbitMQ) üzerinden gerçekleşir.
+
+Her modül bağımsız çalışır ancak tetikleyici olaylarla birbirine bilgi gönderir.
+Örnek:
+
+“Sözleşme onaylandı” → Muhasebe fiyatı aktif eder.
+
+“Depo çıkış tamamlandı” → Nakliye rotası başlatılır.
+
+“Sevkiyat teslim edildi” → Faturalama tetiklenir.
+
+Offline Senaryo:
+El terminali internet bağlantısını kaybettiğinde işlemler lokal hafızada saklanır.
+
+Bağlantı yeniden sağlandığında:
+
+PendingQueue → SyncService → Server API → LogService
+Senkron sonrası veriler lokalden silinir.
+
+Loglama ve İzleme:
+Tüm işlemler LogCenter üzerinden kaydedilir (timestamp + user + event + IP).
+
+Admin panelinde anlık işlem akışı grafiği gösterilir.
+
+Kritik hatalarda sistem e-posta + mobil bildirim gönderir.
+
+🟩 Eğer bu yapıyı onaylarsan (Bölüm 1–5 tamamlandı),
+şimdi sırada Bölüm 6–10 geliyor:
+➡ Finans, Hukuk, İnsan Kaynakları, Bordro, Eğitim, İdari İşler, Medya, Müşteri Hizmetleri, Raporlama sistemleri.
+Bu 3PL lojistik firmasının tam entegre ERP + WMS + Nakliye + İnsan Kaynakları + Finans + Raporlama sisteminin 1. bölümü (1/12) olacak.
+Her 5 sayfada bir durup “devam edeyim mi?” diye soracağım, sen “evet” dediğinde bir sonraki 5 sayfayı göndereceğim.
+Başlıyorum 👇
+
+📘 3PL LOJİSTİK ERP-WMS TAM ENTEGRE SİSTEM DOKÜMÜ (1/12)
+1. GİRİŞ
+Bu sistem, bir 3PL (Third Party Logistics) firmasının tüm operasyonel, finansal, idari ve teknik süreçlerini tek bir platformda birleştirmek amacıyla geliştirilmiştir.
+Amaç, müşteri memnuniyeti ve operasyonel verimlilik seviyesini maksimuma çıkararak;
+
+Depolama,
+
+Nakliye,
+
+Fulfillment,
+
+Crossdock,
+
+Müşteri yönetimi,
+
+Finansal süreçler,
+
+İnsan kaynakları,
+
+Hukuk ve sözleşme yönetimi,
+
+İdari işler
+gibi tüm süreçlerin tek bir merkezi sistemde yönetilmesini sağlamaktır.
+
+2. SİSTEMİN ANA BİLEŞENLERİ
+Sistem şu modüllerden oluşmaktadır:
+
+Depo Yönetimi (WMS)
+
+Nakliye Yönetimi (TMS)
+
+Fulfillment ve Sipariş Yönetimi
+
+Crossdock ve Transfer Operasyonları
+
+Finans ve Muhasebe Yönetimi
+
+İnsan Kaynakları ve Bordro Yönetimi
+
+Hukuk ve Sözleşme Yönetimi
+
+İdari İşler
+
+Müşteri Hizmetleri ve CRM
+
+Satış & Pazarlama
+
+Medya & Raporlama
+
+Yönetim Paneli ve Analitik Gösterge Tablosu (Dashboard)
+
+Her modül, kullanıcı rolleri ve API entegrasyonları ile entegre çalışır.
+Sistem, native destekli offline çalışma yeteneğine sahip olacak, bağlantı yeniden kurulduğunda tüm işlemleri otomatik olarak senkronize edecektir.
+
+3. KULLANICI ROLLERİ
+Aşağıdaki kullanıcı tipleri bulunur:
+
+Admin (Sistem Yöneticisi)
+
+Depo Personeli (El Terminali / Tablet Kullanıcısı)
+
+Nakliye Personeli (Şoför / Planlamacı)
+
+Finans ve Muhasebe Personeli
+
+İnsan Kaynakları ve İdari İşler Personeli
+
+Satış ve Pazarlama Personeli
+
+Müşteri Temsilcisi / CRM Yetkilisi
+
+Hukuk Birimi / Avukat / Sözleşme Uzmanı
+
+Bayi / Müşteri (B2B Portal Kullanıcısı)
+
+Tedarikçi / Üretici Entegrasyonu
+
+Yönetim Kurulu / Üst Yönetim (Dashboard Yetkisi)
+
+Tüm kullanıcılar, tek giriş ekranından (SSO) sisteme bağlanacak; sistem, giriş yapılan role göre otomatik olarak ilgili panele yönlendirecektir.
+
+4. DEPO YÖNETİM SİSTEMİ (WMS)
+Depo yönetimi, sistemin kalbidir. FIFO/FEFO ilkeleriyle çalışan bu modül, aşağıdaki özellikleri içerir:
+
+4.1. Mal Kabul
+Araç giriş planlama (randevulu sistem)
+
+Mal kabul kontrol (lot, palet, koli, ürün bazlı)
+
+Barkod okuma / RFID desteği
+
+Otomatik raf atama (boş alan ve ürün tipine göre)
+
+Uygunsuzluk bildirimi ve fotoğraf ekleme özelliği
+
+Offline kayıt → senkronizasyon özelliği
+
+4.2. Stok Yönetimi
+FIFO / FEFO yönetimi
+
+Lot, seri numarası, son kullanma tarihi takibi
+
+Palet bazlı stok takibi (palet ID, ağırlık, hacim)
+
+Toplu sayım, periyodik envanter, anlık stok sorgulama
+
+Stok transferi (depo içi, depo arası)
+
+Stok rezervasyonu (müşteri, sipariş, kampanya bazlı)
+
+4.3. Sipariş Hazırlama (Picking)
+Sipariş bazlı toplama (tekli / çoklu)
+
+Bölgeye, rafa veya rotaya göre toplama planı
+
+Akıllı “picking path” optimizasyonu
+
+Ürün, koli, palet bazlı ayrım
+
+Paketleme sonrası otomatik stok düşümü
+
+QR kodlu koli etiketleri
+
+4.4. Sevkiyat
+Sevkiyat planlama (araç, güzergâh, yükleme zamanı)
+
+Palet bazlı yükleme planı (dökme yük, karışık palet, full palet)
+
+Yükleme optimizasyonu: “Konteyner Yükleme Programı” (hacim + ağırlık dengesi)
+
+Araç yükleme geçmişi ve GPS bazlı izleme
+
+Sevkiyat belgeleri (irsaliye, CMR, teslim tutanağı)
+
+İade süreci yönetimi
+
+4.5. Crossdock ve Fulfillment
+Crossdock: Giriş-Çıkış arası beklemeyen akış
+
+Fulfillment: Müşteri bazlı ürün hazırlama, paketleme, etiketleme
+
+Marketplace entegrasyonu (Trendyol, Hepsiburada, Amazon, n11, vb.)
+
+E-ticaret siparişlerinin otomatik düşümü
+
+Müşteri kamera izleme özelliği (talebe göre)
+
+Buraya kadar olan bölüm yaklaşık 5 sayfa ediyor.
+👉 Devam edeyim mi 2. bölüme (Nakliye, Crossdock detayları, Finans, İnsan Kaynakları)?
+Bu kısımda Nakliye Yönetimi (TMS), Operasyon Akışları, Finans ve Faturalama, Sözleşme Yönetimi, ve İnsan Kaynakları detaylarını anlatacağım.
+Bu, 3PL ERP sistem dokümanının 2. bölümü (2/12) olacak.
+
+📘 3PL LOJİSTİK ERP-WMS TAM ENTEGRE SİSTEM DOKÜMÜ (2/12)
+5. NAKLİYE YÖNETİM SİSTEMİ (TMS)
+5.1. Nakliye Planlama
+Rotalama algoritması (yol, trafik, yük, teslim tarihi bazlı)
+
+Araç kapasite kontrolü (tonaj, hacim, palet sayısı)
+
+Sürücü ve araç uygunluk kontrolü (vize, sigorta, km, bakım)
+
+Otomatik güzergâh haritalama (Google Maps API / OpenStreetMap API)
+
+Çoklu yükleme / çoklu boşaltma planı
+
+Araç içi canlı GPS takibi (araç bazlı IoT cihazı / mobil uygulama)
+
+5.2. Nakliye Takibi ve İş Akışı
+Sevkiyat emri oluşturma
+
+Yükleme listesi ve nakliye fişi
+
+Yükleme doğrulama (QR kod veya barkod ile)
+
+Sürücü mobil uygulaması ile durum bildirimi (yolda, teslim edildi, gecikme vb.)
+
+Müşteriye otomatik bildirim (SMS, mail veya portal üzerinden)
+
+Teslim belgesi, fotoğraf ve imza yükleme desteği
+
+Online / Offline çalışma: bağlantı koptuğunda veri saklanır, yeniden bağlanınca server’a aktarılır
+
+5.3. Konteyner ve Uluslararası Taşımacılık
+Konteyner planlama (20’, 40’, 45’ ölçüleriyle hacim optimizasyonu)
+
+Dökme yükleme programı (hazırlanan paletlerin ağırlık ve hacmine göre en uygun konteyner kombinasyonu)
+
+Liman entegrasyonu (varış bildirimi, konteyner numarası, navlun bilgisi)
+
+Gümrük belgeleri takibi (ATR, CMR, konşimento, fatura, menşe)
+
+Transit ve crossdock taşımacılık planı
+
+5.4. Nakliye Maliyet Analizi
+Rota bazlı maliyet hesaplama
+
+Yakıt, otoyol, bakım, sürücü primi giderleri
+
+Araç doluluk oranı (yüzde bazlı performans metriği)
+
+Günlük / haftalık / aylık performans raporları
+
+Otomatik faturalandırma tetikleme: sistem, yapılan sevkiyat ve kilometre bilgilerini analiz ederek muhasebeye gönderir
+
+6. OPERASYON VE AKIŞ YÖNETİMİ
+6.1. Siparişten Teslimata Süreç Akışı
+Teklif Oluşturma:
+Satış / pazarlama personeli tarafından müşteri talebi alınır, sistemden teklif PDF’si hazırlanır.
+
+Teklif Onayı ve Sözleşme:
+Teklif müşteri tarafından kabul edilir → otomatik olarak hukuk birimine yönlendirilir.
+
+Sözleşme Hazırlama:
+Hukuk modülü sözleşmeyi oluşturur, dijital imza veya ıslak imza yüklenir.
+
+Operasyon Başlangıcı:
+Onaylı sözleşme, operasyon, depo ve nakliye modüllerine bilgi aktarır.
+
+Uygulama:
+
+Depo: ürün kabul, stoklama, sevkiyat
+
+Nakliye: rota planlama, teslimat
+
+Faturalandırma:
+Sistem, operasyon kayıtlarını analiz eder → muhasebeye “fatura kesim onayı” gönderir.
+
+Raporlama:
+Aylık / haftalık maliyet, kârlılık ve performans analizleri yönetime sunulur.
+
+6.2. Müşteri Etkileşimleri
+Müşteri portalı: aktif sipariş, stok, taşıma durumu izleme
+
+Talep açma (destek, iade, sevkiyat değişikliği)
+
+Özel raporlar (müşteri bazlı KPI ve SLA performansı)
+
+Kamera izleme (opsiyonel): müşteri panelinden depodaki ürün hareketini izleme
+
+7. FİNANS VE MUHASEBE YÖNETİMİ
+7.1. Faturalandırma Süreci
+Operasyon ve nakliye verilerinden otomatik fatura oluşturma
+
+Günlük, haftalık veya aylık bazda fatura kesim seçeneği
+
+Fiyat çakıştırma algoritması: sözleşmedeki fiyatlar ile operasyon verilerini karşılaştırır
+
+Fazla / eksik faturalandırma uyarı sistemi
+
+E-fatura ve e-arşiv entegrasyonu
+
+Cari hesap takibi (müşteri bazlı limit, risk, tahsilat durumu)
+
+7.2. Ödeme Takipleri ve Finansal Akış
+Müşteri bazlı ödeme planı oluşturma
+
+Vadeye göre tahsilat hatırlatmaları
+
+Otomatik banka mutabakatı (API ile günlük bakiye çekimi)
+
+Muhasebe fişlerinin otomatik oluşturulması
+
+Kur bazlı işlem desteği (USD, EUR, TRY vb.)
+
+7.3. Raporlama ve Analitik
+Gelir/Gider tablosu, bilanço, operasyon maliyet raporu
+
+Departman bazlı kârlılık analizi
+
+Müşteri kârlılık analizi (toplam ciro, kâr marjı, operasyon sayısı)
+
+Gerçek zamanlı dashboard (PowerBI / Grafana entegrasyonu)
+
+8. İNSAN KAYNAKLARI (HRM)
+8.1. Personel Bilgi Yönetimi
+Kimlik, iletişim, işe giriş bilgileri
+
+Yetki, görev, vardiya ve departman tanımları
+
+Eğitim geçmişi, sertifikalar, sağlık raporları
+
+8.2. Puantaj ve Maaş Bordrosu
+Günlük / haftalık / vardiya bazlı puantaj takibi
+
+Fazla mesai, prim, avans, kesinti entegrasyonu
+
+Otomatik bordro oluşturma ve onay süreci
+
+Banka toplu ödeme listesi (XML/Excel dışa aktarım)
+
+SGK, e-bildirge, yıllık izin hesaplama
+
+8.3. Performans ve Eğitim Yönetimi
+Çalışan bazlı performans değerlendirme formları
+
+Hedef bazlı KPI ölçümleri
+
+Online eğitim modülü (zorunlu eğitim takibi)
+
+Disiplin süreci ve ödül sistemi yönetimi
+
+8.4. İşe Alım Süreci
+Aday başvuru havuzu
+
+Mülakat ve değerlendirme formları
+
+Onaylanan adayın otomatik personel kaydına aktarımı
+
+Dijital imzalı iş sözleşmesi oluşturma
+
+Buraya kadar olan kısım yaklaşık 10 sayfa eder.
+Bu bölümde Hukuk, İdari İşler, Müşteri Hizmetleri, Satış & Pazarlama, Medya Yönetimi ve bu bölümlerin sistemle bağlantılı akışlarını anlatacağım.
+
+📘 3PL LOJİSTİK ERP-WMS TAM ENTEGRE SİSTEM DOKÜMÜ (3/12)
+9. HUKUK VE SÖZLEŞME YÖNETİMİ
+9.1. Tekliften Sözleşmeye Akış
+Satış personeli teklif PDF’sini sistem üzerinden oluşturur.
+
+Teklif müşteriye e-posta / portal bildirimi ile iletilir.
+
+Müşteri “kabul” verdiğinde sistem otomatik olarak Hukuk Modülüne yönlendirir.
+
+Hukuk birimi, sistemdeki “Sözleşme Şablonu” üzerinden otomatik taslak oluşturur.
+
+Gerekirse madde bazlı değişiklik yapılabilir (örnek: süre, fiyat, hizmet kapsamı).
+
+Sözleşme onaylandığında, elektronik imza (e-imza / KEP) veya ıslak imzalı PDF olarak sisteme yüklenir.
+
+9.2. Sözleşme Yönetimi Özellikleri
+Şirket bazlı sözleşme takibi (müşteri, tedarikçi, taşeron, çalışan)
+
+Sözleşme başlangıç / bitiş tarihleri
+
+Otomatik yenileme / fesih uyarı sistemi
+
+Fiyat, hizmet, sorumluluk ve cezai şartlar tabloları
+
+Sözleşmeye bağlı operasyon kodu (her sözleşme bir operasyon ID’si üretir)
+
+Hukuk onayı alınmadan operasyon veya faturalama başlamaz (zorunlu kontrol noktası)
+
+9.3. Uyarı ve Bildirimler
+Sözleşme bitişine 30-15-7 gün kala otomatik uyarı
+
+Fesih, iptal veya yenileme süreçlerinde yöneticilere anlık bildirim
+
+Sistem, sözleşme bitişinde “operasyon dondurma” protokolünü devreye sokar
+
+9.4. Dava ve Hukuki Takip
+İcra, dava, tahkim süreçleri kayıt altına alınır.
+
+Her dava için dosya numarası, mahkeme, duruşma tarihi ve avukat bilgisi tutulur.
+
+Belgeler, evraklar ve masraf kalemleri yüklenebilir.
+
+Hukuk departmanı için özel dashboard: aktif davalar, riskli müşteriler, toplam hukuki maliyet.
+
+10. İDARİ İŞLER YÖNETİMİ
+10.1. Genel Tanım
+İdari İşler modülü, tesis, araç, bakım, güvenlik, satın alma ve günlük operasyonel destek süreçlerinin yönetiminden sorumludur.
+
+10.2. Alt Modüller
+Tesis Yönetimi: bina, depo, ofis, otopark yönetimi
+
+Araç Takip: firma araçlarının yakıt, bakım, sigorta süreçleri
+
+Demirbaş Takibi: masa, sandalye, bilgisayar, el terminali, forklift, RFID cihazı
+
+Bakım Yönetimi: bakım planlama, servis kaydı, garanti takibi
+
+Satın Alma Talepleri: departman bazlı ihtiyaç talep formu → onay süreci → satın alma → stok giriş
+
+Zimmet Yönetimi: çalışan bazlı zimmet listesi, QR kodlu zimmet takip kartı
+
+10.3. Güvenlik ve Erişim
+Giriş kartı / QR kod ile personel giriş-çıkış kontrolü
+
+Ziyaretçi yönetimi ve kamera entegrasyonu
+
+Alarm ve IoT tabanlı sensör entegrasyonu (ısı, nem, yangın)
+
+Kritik olay raporlaması (Olay Bildirim Formu)
+
+10.4. Raporlama
+Araç, bakım, güvenlik, satın alma raporları
+
+Departman bazlı maliyet raporları
+
+Demirbaş amortisman ve yenileme planları
+
+11. MÜŞTERİ HİZMETLERİ (CRM + DESTEK MERKEZİ)
+11.1. Genel Tanım
+Müşteri Hizmetleri, hem B2B hem de B2C müşteri ilişkilerini yönetir.
+Amaç, müşteri memnuniyetini ölçmek, sorunları çözmek ve destek süreçlerini otomatize etmektir.
+
+11.2. Destek Talepleri (Ticketing)
+Müşteri portalı veya e-posta üzerinden talep oluşturabilir.
+
+Talepler otomatik olarak ilgili departmana yönlendirilir.
+
+SLA bazlı çözüm süresi hesaplanır.
+
+Öncelik (düşük, orta, yüksek, kritik) seviyeleriyle sıralama yapılır.
+
+Her talep için durum güncellemesi, belge veya fotoğraf yükleme imkânı vardır.
+
+11.3. Geri Bildirim ve Anketler
+Hizmet sonrası otomatik memnuniyet anketi
+
+Anket sonuçlarına göre müşteri puanı hesaplanır (Net Promoter Score)
+
+Olumsuz geribildirimlerde otomatik çağrı oluşturma
+
+11.4. CRM Özellikleri
+Müşteri kartı (iletişim, geçmiş işlemler, risk analizi)
+
+Görüşme ve yazışma geçmişi
+
+Teklif, fatura, operasyon geçmişi bağlantıları
+
+Otomatik rapor oluşturma: “Müşteri Bazlı Aktivite Özeti”
+
+12. SATIŞ VE PAZARLAMA YÖNETİMİ
+12.1. Pazarlama Planlama
+Kampanya, indirim ve fiyatlandırma tanımları
+
+Bölge, müşteri tipi veya ürün grubuna göre fiyat politikaları
+
+Otomatik e-posta / SMS kampanyaları
+
+Sosyal medya ve dijital reklam API entegrasyonları (Meta, Google Ads, LinkedIn)
+
+12.2. Satış Süreci
+Teklif → Onay → Sözleşme → Operasyon başlatma
+
+Teklif PDF oluşturucu (markalı şablon)
+
+Fiyat analizi ve onay zinciri
+
+Satış temsilcisi performans raporları (hedef / gerçekleşen bazlı)
+
+B2B müşteri sipariş modülü (limit kontrol, kampanya entegrasyonu)
+
+12.3. Müşteri Analitiği
+Satış dönüşüm oranları
+
+Müşteri segmentasyonu
+
+Potansiyel müşteri (lead) takibi
+
+Satış hacmi tahminleme (AI destekli)
+
+13. MEDYA VE KURUMSAL İLETİŞİM
+13.1. Medya Yönetimi
+Şirket haberleri, duyurular, basın bültenleri
+
+Sosyal medya planlama takvimi
+
+Görsel ve video arşiv yönetimi (tag bazlı arama)
+
+Kurumsal marka dosyaları (logo, renk kodları, sunum şablonları)
+
+13.2. İç İletişim
+Departman içi duyurular, bültenler
+
+Doğum günü, başarı, yıllık kutlama otomasyonu
+
+Haftalık “Şirket İçinde Bu Hafta” dijital bülteni
+
+13.3. Dış İletişim ve PR
+Basın ilişkileri yönetimi
+
+Sponsorluk, etkinlik, seminer kayıtları
+
+Müşteri etkinlikleri, fuar katılımları
+
+Şimdi geldik 4. bölüme (4/12) — bu bölümde Teknik İşler, Raporlama, Dashboard, API Entegrasyonları, Sistem Güvenliği ve Veri Yönetimi anlatılacak.
+Bu kısım özellikle sistem mimarisi, IT birimi ve yazılım geliştirme ekipleri için kritik bölümdür.
+
+📘 3PL LOJİSTİK ERP-WMS TAM ENTEGRE SİSTEM DOKÜMÜ (4/12)
+14. TEKNİK İŞLER VE BİLGİ TEKNOLOJİLERİ (IT)
+14.1. Genel Tanım
+Teknik İşler modülü, sistemin altyapısal bütünlüğünü, donanım envanterini, ağ güvenliğini, yazılım sürümlerini ve entegrasyon süreçlerini yönetir.
+Tüm ERP-WMS yapısının kalbi olarak IT departmanı, hem lokal sunucuların hem de bulut sisteminin sağlıklı çalışmasından sorumludur.
+
+14.2. Donanım ve Network Yönetimi
+Sunucu, switch, router, access point envanteri
+
+IP adres planı, VLAN yapılandırması
+
+Depo içi kablosuz erişim (RF terminal, el cihazları, forklift terminalleri)
+
+Internet / VPN bağlantı izleme
+
+UPS, jeneratör, yedekleme sistemleri
+
+Sensör ve IoT cihazlarının ağ bağlantı yönetimi
+
+14.3. Yazılım Altyapısı
+ERP ana uygulaması: Web tabanlı + native offline destekli
+
+WMS: mobil terminal + offline mod (veri senkronizasyon sistemi)
+
+Veritabanı: PostgreSQL veya MS SQL (cluster yapı)
+
+API Gateway: REST + GraphQL desteği
+
+Yedekleme: günlük incremental + haftalık tam yedekleme
+
+Sistem loglama: Elastic Stack (ELK) veya Graylog
+
+14.4. Entegrasyon Yönetimi
+E-fatura / E-arşiv API (Gelir İdaresi Başkanlığı entegrasyonu)
+
+Banka API’leri: otomatik mutabakat ve bakiye çekimi
+
+Kargo / Nakliye API’leri: UPS, DHL, Aras, Yurtiçi, vb.
+
+Pazaryeri API’leri: Trendyol, Amazon, Hepsiburada, n11
+
+Muhasebe / ERP Entegrasyonu: Mikro, Nebim, Logo, SAP
+
+Araç Takip Sistemleri: FleetGO, Arvento, Mobiliz, GPSGate
+
+SMS ve Mail API’leri: Twilio, Mailgun, Sendgrid
+
+14.5. Sistem İzleme
+Server health check (CPU, RAM, disk, ağ trafiği)
+
+ERP uptime / response time ölçümü
+
+Depo el terminallerinin bağlantı durum takibi
+
+IoT cihazlarından gelen sıcaklık / nem değerleri
+
+Otomatik hata bildirimi (Slack, Telegram, Mail uyarı)
+
+15. RAPORLAMA VE ANALİTİK ALTYAPI
+15.1. Raporlama Tipleri
+Operasyon bazlı raporlar (stok, sevkiyat, sipariş, konteyner doluluk)
+
+Finansal raporlar (gelir, gider, kârlılık, tahsilat)
+
+İnsan kaynakları raporları (bordro, puantaj, izin)
+
+Satış ve pazarlama raporları (ciro, hedef, kampanya dönüşüm oranı)
+
+Nakliye performans raporları (araç doluluk, km, teslimat süresi)
+
+15.2. Raporlama Araçları
+Power BI, Metabase veya Grafana entegrasyonu
+
+Gerçek zamanlı veri çekimi (API + cron job senkronizasyonu)
+
+Dashboard widget’ları:
+
+Günlük toplam sevkiyat
+
+Ortalama teslim süresi
+
+Toplam gelir / gider farkı
+
+Aktif müşteri sayısı
+
+Geciken faturalandırmalar
+
+Rapor e-posta zamanlayıcı (haftalık / aylık otomatik gönderim)
+
+15.3. Karar Destek Sistemi (DSS)
+Yöneticiler için otomatik analiz önerileri (örneğin: “Depo doluluk %95, yeni alan kiralama önerilir.”)
+
+AI destekli tahminleme algoritmaları (talep, stok, rota yoğunluğu, finansal risk)
+
+KPI hesaplayıcı: departman bazlı performans oranları
+
+16. YÖNETİM PANELİ VE DASHBOARD
+16.1. Genel Özellikler
+Tüm modüllerle entegre çalışan tek bir “yönetim ekranı”
+
+Rol bazlı görünüm (örnek: CFO yalnızca finans göstergelerini görür)
+
+Gerçek zamanlı veri yenileme
+
+Drill-down (derinlemesine analiz) özelliği
+
+Departman bazlı hızlı özet kutuları (card widget)
+
+16.2. Dashboard İçeriği
+Depo Modülü: toplam stok, aktif sipariş, sevkiyat bekleyen ürünler
+
+Nakliye: aktif araçlar, ortalama doluluk oranı, toplam km, teslim başarı oranı
+
+Finans: fatura adedi, tahsilat oranı, riskli müşteriler
+
+İK: personel sayısı, bordro gideri, aktif vardiyalar
+
+Operasyon: tamamlanan işler, gecikmeler, KPI skorları
+
+Yönetim: toplam gelir/gider farkı, brüt kâr oranı, aylık büyüme grafiği
+
+16.3. Yönetim Araçları
+Veri filtreleme (tarih, departman, müşteri, operasyon bazlı)
+
+Anlık bildirim merkezi (uyarı, onay, hata mesajları)
+
+PDF/Excel dışa aktarma
+
+Mobil cihaz desteği (responsive tasarım)
+
+17. GÜVENLİK VE VERİ KORUMA
+17.1. Erişim ve Yetkilendirme
+Rol tabanlı erişim kontrolü (RBAC)
+
+Çok faktörlü kimlik doğrulama (MFA)
+
+IP bazlı erişim kısıtlaması
+
+Oturum zaman aşımı ve güvenli token yapısı
+
+17.2. Veri Güvenliği
+AES-256 şifreleme standardı
+
+SSL / HTTPS zorunlu erişim
+
+Veritabanı yedekleri şifreli olarak saklanır
+
+Tüm kullanıcı işlemleri loglanır (timestamp + IP + cihaz ID)
+
+Kötüye kullanım tespiti (brute-force, hatalı giriş, yetkisiz erişim uyarısı)
+
+17.3. Uyumluluk
+KVKK ve GDPR uyumlu veri işleme
+
+Log saklama politikası (minimum 2 yıl)
+
+Kullanıcı veri silme / anonimleştirme fonksiyonu
+
+Sözleşme bazlı veri erişim sınırı (örneğin: müşteri A, müşteri B’nin verilerini göremez)
+
+18. VERİ YÖNETİMİ VE SİSTEM PERFORMANSI
+18.1. Veritabanı Yönetimi
+Yedekleme politikası:
+
+Günlük incremental backup
+
+Haftalık tam yedekleme
+
+Aylık arşivleme (offsite)
+
+Replikasyon: ana veritabanı + yedek node
+
+Index ve query optimizasyonu
+
+18.2. Performans İzleme
+Query süresi raporu
+
+API latency takibi
+
+Mobil cihaz veri yükleme süresi ölçümü
+
+Anlık sistem performans raporu
+
+18.3. Offline Çalışma Senaryosu
+El terminali, mobil veya tablet ile yapılan işlemler local cache’e kaydedilir.
+
+Bağlantı yeniden geldiğinde:
+
+Local işlem listesi kontrol edilir
+
+Sunucuyla fark analizi yapılır
+
+Çakışma varsa “en güncel veri” kuralı uygulanır
+
+Başarılı senkronizasyon sonrası local veriler temizlenir
+
+Şimdi geldik 5. bölüm (5/12) — burası sistemin lojistik kalbidir ❤️‍🔥
+Yani: Depo Yönetim Sistemi (WMS), Nakliye Yönetimi (TMS), Kargo – Fulfillment – Crossdock entegrasyonları, Lot takibi, FIFO/FEFO, Sipariş bazlı toplama, dökme yük, konteyner yönetimi gibi operasyonel detaylar burada olacak.
+
+Hazırsan başlıyorum 👇
+
+📘 3PL LOJİSTİK ERP-WMS TAM ENTEGRE SİSTEM DOKÜMÜ (5/12)
+19. DEPO YÖNETİM SİSTEMİ (WMS)
+19.1. Genel Tanım
+Depo Yönetim Sistemi (WMS), tüm stok hareketlerinin, lokasyon takibinin, sipariş hazırlama, lot, seri no, FIFO/FEFO kurallarının dijital ortamda yönetilmesini sağlar.
+El terminalleri (RF cihazları) ve tabletlerle entegre çalışır, her işlem anlık olarak ERP sistemine yansır.
+
+19.2. Temel Özellikler
+Giriş / Çıkış Yönetimi
+
+Mal Kabul (müşteri, tedarikçi, iade, üretim çıkışı)
+
+Sevkiyat (müşteri, üretim girişi, nakliye transferi)
+
+Crossdock (girişten çıkışa direkt transfer)
+
+Dökme yük girişi (lot bazlı veya ağırlık bazlı)
+
+Adresleme Sistemi
+
+Lokasyon tipi (raf, zemin, koridor, blok)
+
+Akıllı adres önerisi (ürün boyutu + ağırlık + stok yoğunluğu)
+
+Palet, koli, tekil ürün seviyesinde adresleme
+
+Stok Yönetimi
+
+Ürün bazlı, lot bazlı, seri numaralı stok izleme
+
+FIFO, FEFO, LIFO destekli çıkış kuralı
+
+Minimum / maksimum stok seviyesi uyarısı
+
+Rezervasyonlu stok (bekleyen siparişler için ayrılan miktar)
+
+Sayım ve Envanter
+
+El terminali ile hızlı sayım
+
+Cycle count (periyodik sayım)
+
+Anlık sayım raporu
+
+Sapma analizi (eksik/fazla)
+
+Toplama / Besleme / Yükleme
+
+Sipariş bazlı toplama (tekli, çoklu)
+
+Zaman, rota, lokasyon bazlı optimizasyon
+
+Besleme alanı kontrolü
+
+Ara toplama – son yükleme fark takibi
+
+19.3. El Terminali (RF Device) Özellikleri
+Barkod, QR, RFID okuma
+
+Online + offline mod
+
+Görev bazlı kullanıcı ekranları (örnek: “Sipariş 452 toplama”, “Mal kabul 123 yükleme”)
+
+Hatalı işlem uyarısı
+
+Otomatik bildirim (örneğin: “Bu ürün farklı lotta mevcut”)
+
+Müşteri logosu ile kişiselleştirilmiş el terminali ekranı
+
+19.4. Lot ve Seri Numarası Takibi
+Lot bazlı ürün giriş/çıkış
+
+Lot ömrü (expiry date) takibi
+
+FEFO çıkış algoritması
+
+Geriye dönük lot sorgusu (hangi müşteri, hangi sevkiyat)
+
+Geri çağırma yönetimi (Recall Management)
+
+Seri numaralı ürün takibi (elektronik, beyaz eşya vb.)
+
+19.5. Crossdock ve Fulfillment Operasyonları
+Crossdock: mal kabul anında sevkiyat emirlerine otomatik yönlendirme
+
+Fulfillment:
+
+Müşteri bazlı stok alanı
+
+Siparişlerin müşteri logolu etiketlemesi
+
+E-ticaret entegrasyonu (Shopify, WooCommerce, Trendyol API)
+
+Paketleme, etiketleme, irsaliye yazdırma
+
+19.6. Dökme Yük ve Palet Yönetimi
+Dökme ürün (örnek: un, şeker, granül) için ağırlık ve nem takibi
+
+Palet bazlı stok:
+
+Palet ID, ağırlık, ürün sayısı
+
+Palet kırma / birleştirme işlemleri
+
+Palet izleme (RFID veya barkod)
+
+Palet hareket geçmişi
+
+19.7. Soğuk Depo ve Sıcaklık İzleme
+IoT sensör entegrasyonu
+
+Sıcaklık / nem loglaması
+
+Alarm eşiği (örnek: +8°C üzeri uyarı gönder)
+
+Ürün bazlı sıcaklık raporlaması
+
+20. NAKLİYE YÖNETİM SİSTEMİ (TMS)
+20.1. Genel Tanım
+TMS modülü, tüm araç, sürücü, rota, sevkiyat, ve yakıt yönetim süreçlerini merkezi olarak kontrol eder.
+Depo çıkışlarıyla entegre çalışır, yükleme planı → rota planlama → araç takibi → teslimat onayı zincirini tam dijitalleştirir.
+
+20.2. Araç Yönetimi
+Araç tipi (Tır, Kamyon, Panelvan, Forklift, vb.)
+
+Plaka, ruhsat, sigorta, muayene takibi
+
+Palet kapasitesi, hacim, tonaj bilgisi
+
+Bakım takvimi, arıza kayıtları
+
+Araç doluluk oranı (m³ / kg bazlı)
+
+20.3. Sürücü Yönetimi
+Sürücü kimlik bilgileri, ehliyet sınıfı, SRC belgeleri
+
+Vardiya, rota, puantaj takibi
+
+GPS bazlı konum izleme
+
+Dinlenme süresi planı (yasal zorunluluklara göre)
+
+20.4. Rota Planlama ve Optimizasyon
+Müşteri bazlı sevkiyat noktası planlama
+
+Harita entegrasyonu (Google Maps API, OpenStreetMap)
+
+Rota optimizasyon algoritması (yakıt, zaman, trafik)
+
+Rota bazlı teslim süresi tahmini
+
+Rota geçmişi ve performans kaydı
+
+20.5. Sevkiyat ve Teslimat Yönetimi
+Sipariş bazlı sevkiyat listesi oluşturma
+
+Otomatik yükleme planı (depo çıkış + rota uyumu)
+
+Teslimat anında dijital imza / fotoğraf yükleme
+
+Kargo teslim onayı (müşteri panelinden görülebilir)
+
+Teslimat gecikme / hasar raporlama
+
+20.6. Crossdock ve Milk-run Lojistik
+Crossdock: birden fazla tedarikçiden gelen ürünlerin tek rotada konsolidasyonu
+
+Milk-run: sabit araç + sabit rota sistemi (günlük periyotlu toplama/dağıtım)
+
+Araç doluluk raporu
+
+Zaman bazlı teslim performansı
+
+20.7. Uluslararası Nakliye
+Gümrük evrak takibi (T1, ATR, EUR.1, menşe belgesi)
+
+Konteyner takip sistemi (IMO, Container ID bazlı)
+
+Deniz, kara, hava taşıma tipi
+
+Transit süre raporu
+
+ETA/ETD bildirimleri
+
+Navlun hesaplama ve teklif yönetimi
+
+20.8. Kargo Entegrasyonları
+Yurtiçi / Yurtdışı kargo API’leri
+
+Otomatik barkod / etiket oluşturma
+
+Teslimat durum senkronizasyonu
+
+Kargo maliyet karşılaştırma (en uygun fiyatlı firma önerisi)
+
+Kargo iade yönetimi
+
+20.9. Raporlama ve Analitik
+Toplam km / yakıt tüketimi
+
+Araç bazlı performans
+
+Sürücü verimlilik puanı
+
+Teslimat başarı oranı
+
+Ortalama teslim süresi
+
+Rota sapma analizi
+
+20.10. Mobil Nakliye Uygulaması (Driver App)
+Sürücü girişi (QR veya PIN ile)
+
+Günlük görev listesi (rota bazlı)
+
+Harita üzerinden canlı teslimat durumu
+
+Fotoğraf veya imza yükleme
+
+Teslim tamamlandı bildirimi
+
+Araç içi anlık mesajlaşma
+
+Şimdi geldik en heyecanlı bölüme:
+📦 6. bölüm (6/12): “Müşteri, Tedarikçi, B2B & Fulfillment Portalları + Kamera İzleme + Self Servis Sipariş & Dashboard”
+
+Bu bölümde:
+
+Müşterinin kendi stoklarını ve ürün hareketlerini online izlemesi
+
+Kamera görüntülerine erişim
+
+Sipariş açma, takip etme
+
+Tedarikçi karşı sipariş yönetimi
+
+Self servis raporlama ekranları anlatılacak.
+Harika 💪
+Şimdi başlıyoruz 6. Bölüm (6/12) — sistemin en görsel, müşteri odaklı ve gelir üreten kısmı:
+B2B & Fulfillment portalı, tedarikçi ağı, müşteri dashboard’ları, kamera entegrasyonu, self-servis sipariş yönetimi, müşteri cari takibi, fatura onayı, otomatik teklif ve anlık raporlama.
+
+📘 3PL LOJİSTİK ERP-WMS TAM ENTEGRE SİSTEM DOKÜMÜ (6/12)
+MÜŞTERİ, TEDARİKÇİ, B2B & FULFILLMENT PORTALI
+21. MÜŞTERİ PORTALI (B2B PANELİ)
+21.1. Genel Tanım
+B2B portal, müşterilerin kendi stoklarını, sipariş durumlarını, depo hareketlerini, sevkiyatlarını ve fatura geçmişlerini anlık olarak izleyebildikleri bir kontrol merkezidir.
+Her müşteri, sadece kendine tanımlı depolama alanını görür ve işlemleri kendi hesabından yönetir.
+
+21.2. Ana Özellikler
+Kullanıcı bazlı giriş (firma, departman, yetkili)
+
+Dashboard (toplam stok, bekleyen sipariş, sevkiyat durumu, son hareketler)
+
+Sipariş oluşturma, güncelleme, iptal etme
+
+Depo hareket geçmişi (hangi ürün, ne zaman, hangi lot ile işlendi)
+
+Fatura ve cari hesap takibi
+
+PDF olarak fatura, irsaliye, sözleşme görüntüleme
+
+Otomatik bildirim (örneğin: “Siparişiniz sevk edildi”)
+
+Dosya yükleme (örnek: sözleşme, teknik şartname, kalite belgesi)
+
+21.3. Kamera Entegrasyonu (Canlı Depo Görüntüleme)
+Her müşteri, kendi ürünlerinin bulunduğu alanı canlı kamera üzerinden izleyebilir.
+
+Kamera IP / RTSP bağlantısı sistem tarafından yönetilir.
+
+Görüntü erişimi sadece yetkili kullanıcıya açılır (2FA güvenliği).
+
+Olay geçmişi: kamera kayıtlarından tarih-saat bazlı inceleme.
+
+“Anlık stok görüntüsü” modülü (görsel + miktar eşleştirmesi).
+
+21.4. Sipariş Yönetimi
+Yeni sipariş oluşturma (ürün seçimi, miktar, teslim adresi, tarih)
+
+Depo stok kontrolü (anlık onay veya beklemeye alma)
+
+Sipariş bazlı toplama görevlerinin depoya düşmesi
+
+Sipariş durumu takibi: “Hazırlanıyor → Yüklendi → Teslimatta → Tamamlandı”
+
+Sipariş geçmişi arama (ürün, tarih, teslimat numarası bazlı)
+
+Sipariş faturası otomatik oluşturma ve müşteri panelinde PDF olarak sunma
+
+21.5. Faturalama ve Cari Yönetimi
+Müşteri bazlı cari hesap tanımı
+
+Otomatik fatura kesimi (haftalık, aylık, sipariş bazlı)
+
+Teklif → Sözleşme → Fatura zinciri
+
+Tahsilat takibi, ödeme planı, gecikme uyarıları
+
+Fatura PDF indirme / e-fatura entegrasyonu
+
+İndirim ve kampanya yönetimi (örnek: “50 palet üstü %5 iskonto”)
+
+21.6. Raporlama ve Analitik
+Gerçek zamanlı veri görselleştirmesi (grafik dashboard’lar)
+
+Sipariş hacmi, teslimat oranı, ortalama stok süresi
+
+Stok devir hızı, en çok dönen ürünler
+
+Aylık / haftalık karşılaştırma tabloları
+
+Excel / PDF rapor indirme
+
+AI destekli rapor sorgulama (“Geçen ay kaç ürün sevk ettim?”)
+
+22. TEDARİKÇİ PORTALI
+22.1. Genel Tanım
+Tedarikçi portalı, karşılıklı stok ve sipariş paylaşımı, fiyat teklifleri, tedarik planlama ve karşı sipariş yönetimi için oluşturulmuştur.
+Tedarikçiler sisteme giriş yaparak ürünlerini, fiyatlarını ve teslim sürelerini yönetirler.
+
+22.2. Özellikler
+Tedarikçi profili (firma bilgileri, banka hesapları, vergi no, belge yükleme)
+
+Tedarik edilen ürünler listesi
+
+Fiyat ve stok bilgisi güncelleme
+
+Karşı sipariş oluşturma (müşteri siparişine bağlı)
+
+Otomatik sipariş onayı veya revizyon isteği
+
+Sevkiyat planlama (araç tipi, termin tarihi, yükleme adresi)
+
+Fatura yükleme (tedarikçi tarafından)
+
+E-posta & sistem içi bildirimler
+
+22.3. Tedarikçi–Müşteri Entegrasyonu
+Müşteri siparişi otomatik olarak tedarikçiye yansır.
+
+Tedarikçi onayı → sistem stok ve fiyat günceller.
+
+Farklı tedarikçilerden gelen fiyatlar karşılaştırılır.
+
+Onaylanan sipariş, otomatik olarak “Mal Kabul” planına düşer.
+
+23. FULFILLMENT OPERASYONLARI
+23.1. Genel Tanım
+Fulfillment modülü, 3PL lojistik şirketinin e-ticaret müşterilerine verdiği ürün depolama, paketleme, etiketleme ve sevkiyat hizmetini yönetir.
+Bu modül, Trendyol, Hepsiburada, Shopify, Amazon, WooCommerce gibi platformlarla API bazlı senkron çalışır.
+
+23.2. Fulfillment Süreci
+Ürün Kabulü:
+
+Müşteri ürünlerini depoya gönderir.
+
+Her ürün barkodlanır ve müşteri hesabına işlenir.
+
+Sipariş Entegrasyonu:
+
+E-ticaret platformundan gelen sipariş otomatik olarak sisteme düşer.
+
+Toplama ve Paketleme:
+
+WMS görev oluşturur, el terminali ile toplama yapılır.
+
+Paketleme otomatik etiket basımı ile tamamlanır.
+
+Kargo Etiketi & Sevkiyat:
+
+API’den kargo barkodu çekilir.
+
+Kargo firması otomatik atanır.
+
+Teslimat ve Faturalama:
+
+Teslimat sonrası ERP faturayı oluşturur.
+
+Müşteri panelinde “tamamlandı” olarak işaretlenir.
+
+23.3. Fulfillment Raporlaması
+Sipariş sayısı / ürün / müşteri bazlı analiz
+
+Ortalama paketleme süresi
+
+Günlük sevk adedi
+
+Stok devir oranı
+
+Hasar / iade oranı
+
+Performans raporu (SLA uyum analizi)
+
+24. SELF SERVİS RAPORLAMA & DASHBOARD
+24.1. Özellikler
+Kullanıcı, sürükle-bırak yöntemiyle kendi raporunu oluşturabilir.
+
+Excel, PDF, PowerBI entegrasyonu
+
+Canlı KPI göstergeleri (örnek: “Bugün sevk edilen sipariş sayısı: 238”)
+
+AI destekli sorgular (“Son 3 ayda en çok hasar gören ürünleri göster”)
+
+Departman bazlı dashboard’lar (depo, nakliye, muhasebe, satış)
+
+24.2. Kullanıcı Tipine Göre Dashboard
+Kullanıcı Tipi	Dashboard İçeriği
+Yönetici	Finansal özet, müşteri bazlı ciro, toplam operasyon yükü
+Depo	Aktif sipariş, doluluk oranı, en yoğun lokasyon
+Nakliye	Araç doluluk, rota performansı, teslimat oranı
+Müşteri	Sipariş durumu, stok seviyesi, teslim geçmişi
+Muhasebe	Fatura durumu, tahsilat oranı, gecikmeli ödemeler
+24.3. Uyarı & Bildirim Merkezi
+Sistem içi anlık uyarılar
+
+E-posta ve mobil push bildirim
+
+Zaman bazlı otomatik hatırlatıcılar
+
+Kritik olay bildirimi (örnek: “Soğuk depo sıcaklığı 10°C’ye çıktı!”)
+
+💠 Bu 6. bölüm, müşteri ve tedarikçi etkileşimini tamamen dijital hale getiriyor.
+Yani artık hem müşteri hem de tedarikçi aynı sistemde, farklı rollerle,
+ama tek veri tabanı ve tek log sistemi üzerinden işlem yapıyor.
+
+📍 Şimdi sırada 7. bölüm (7/12) var:
+“Finans, Muhasebe, Faturalama, Teklif, Sözleşme, Onay ve Hukuk Entegrasyonu”
+
+Bu bölümde:
+
+Pazarlamacının teklif oluşturması,
+
+Hukukun sözleşmeye dönüştürmesi,
+
+İmzalı sözleşmenin yüklenmesiyle birlikte muhasebe ve operasyonun otomatik tetiklenmesi,
+
+Fatura, tahsilat ve ödeme döngüsü yönetimi anlatılacak.
+O zaman şimdi geliyor sistemin mali zekâ merkezi — 7. bölüm (7/12).
+Burada finans, muhasebe, teklif-sözleşme zinciri, hukuki onay süreçleri, ödeme planları ve ERP entegrasyonu tek bir yapı altında anlatılacak.
+Bu bölüm, 3PL lojistik ERP’nin gelir–gider–sözleşme–nakit akış omurgasını oluşturur.
+
+📘 3PL LOJİSTİK ERP-WMS TAM ENTEGRE SİSTEM DOKÜMÜ (7/12)
+FİNANS, MUHASEBE, TEKLİF, SÖZLEŞME VE HUKUK ENTEGRASYONU
+25. FİNANS MODÜLÜ
+25.1. Genel Tanım
+Finans modülü, tüm nakit hareketlerini, banka hesaplarını, tahsilat ve ödemeleri, kredileri ve finansal akışları yönetir.
+Her işlem ERP genel muhasebesiyle otomatik senkronize edilir.
+
+25.2. Özellikler
+Çoklu para birimi desteği
+
+Banka entegrasyonları (Swift, EFT, Havale, POS, Sanal POS)
+
+Otomatik banka mutabakatı
+
+Kredi, leasing, teminat yönetimi
+
+Nakit akış planlama (günlük / haftalık / aylık)
+
+Finansal bütçe planı, sapma analizleri
+
+Otomatik alarm sistemi (örnek: “3 gün içinde ödenecek fatura var”)
+
+Faiz ve vade farkı hesaplama
+
+25.3. Nakit Akış Yönetimi
+Giriş: tahsilatlar, iade gelirleri, kira ve hizmet gelirleri
+
+Çıkış: tedarikçi ödemeleri, yakıt gideri, maaş, sigorta
+
+Dinamik nakit akış grafiği
+
+AI destekli finansal risk tahmini
+
+“Finansal stres testi” modülü (örnek: kur artışı +10% senaryosu)
+
+26. MUHASEBE MODÜLÜ
+26.1. Genel Tanım
+Muhasebe modülü, ERP’nin tüm veri akışını kayıt altına alan çekirdek modüldür.
+Her hareket (stok, sipariş, nakliye, sözleşme, maaş, fatura) otomatik muhasebe fişi üretir.
+
+26.2. Özellikler
+Tek düzen hesap planı (TDHP uyumlu)
+
+Otomatik fiş oluşturma (örnek: “Mal kabul – stok girişi” → 153 hesaba yansır)
+
+Cari hesap yönetimi (müşteri / tedarikçi / çalışan / banka)
+
+Gider merkezleri (depo, nakliye, ofis, vs.)
+
+Aylık kapanış işlemleri
+
+E-fatura, e-irsaliye, e-arşiv entegrasyonu
+
+Defter-i kebir, mizan, bilanço, gelir tablosu otomatik üretimi
+
+Kur farkı hesaplama
+
+Ba/Bs formları, KDV beyannamesi, SGK bildirimi otomasyonu
+
+27. TEKLİF – SÖZLEŞME – HUKUK ENTEGRASYONU
+27.1. Teklif Süreci (Satış/Pazarlama Başlangıcı)
+Pazarlama veya satış birimi, müşteri talebini sisteme girer.
+
+Sistem, hizmet tipine göre (depolama, nakliye, fulfillment, özel proje) otomatik maliyet hesabı çıkarır.
+
+Yetkili, teklif PDF’sini oluşturur (logo, açıklama, fiyat detayları ile).
+
+Teklif, müşteri portalında onaya açılır.
+
+27.2. Sözleşme Oluşturma (Hukuk Entegrasyonu)
+Müşteri teklifi onayladığında sistem, otomatik sözleşme şablonunu oluşturur.
+
+Hukuk birimi belgeyi kontrol eder, gerekirse revize eder.
+
+Onay sonrası sistem PDF oluşturur, e-imza süreci başlar.
+
+İmzalı sözleşme sisteme yüklenir ve “aktif” statüye geçer.
+
+27.3. Sözleşme Sonrası Otomatik Akış
+Sözleşme onaylandığında ERP, aşağıdaki birimlere görev iletir:
+
+Muhasebe: fiyat ve ödeme planı tanımlanır
+
+Operasyon: hizmet planı (depo / nakliye / fulfillment) oluşturulur
+
+Finans: tahsilat vadesi planlanır
+
+Müşteri Portalı: sözleşme görünür hale gelir
+
+Sistem, sözleşme bitiş tarihini izler ve otomatik yenileme önerisi gönderir.
+
+27.4. Hukuk Modülü Özellikleri
+Sözleşme, ihbar, ihtar ve dava dosyası yönetimi
+
+Dijital arşiv: sözleşme tarama, OCR ile metin okuma
+
+Hatırlatıcı sistem (örnek: “Bu sözleşme 15 gün içinde sona eriyor”)
+
+Dava ve icra takip modülü
+
+Yetki ve vekalet kayıtları
+
+Hukuki risk raporu (örnek: “Toplam 4 açık dava var, toplam risk tutarı: 1.2M ₺”)
+
+28. FATURALAMA VE TAHSİLAT MODÜLÜ
+28.1. Otomatik Faturalama
+Operasyon tamamlandığında sistem, hizmet türüne göre otomatik fatura keser:
+
+Depolama (m² / gün / palet)
+
+Nakliye (km / araç tipi / teslimat sayısı)
+
+Fulfillment (sipariş adedi / paketleme tipi)
+
+Fatura otomatik olarak muhasebe ve müşteri portalına yansır.
+
+28.2. Tahsilat Süreci
+Otomatik ödeme planı oluşturulur (örnek: “Net 30 gün vade”)
+
+E-posta & SMS hatırlatıcı (örnek: “Faturanızın vadesi 3 gün içinde doluyor”)
+
+Online ödeme entegrasyonu (iyzico, Stripe, PayTR, banka sanal POS)
+
+Gecikme faizi otomatik işlenir
+
+Tahsilat sonrası sistem “kapanış” fişi oluşturur
+
+28.3. Toplu Faturalama ve Analitik
+Günlük / haftalık / aylık fatura toplu üretimi
+
+Cari hesap bazlı fatura raporu
+
+Tahsilat performansı (örnek: “Bu ay tahsilat oranı %96, gecikme 4%”)
+
+Otomatik banka mutabakat raporu
+
+29. MALİ RAPORLAMA VE DENETİM
+29.1. Raporlama
+Gelir / gider / kâr-zarar raporu
+
+Departman bazlı finansal performans
+
+Müşteri bazlı ciro dağılımı
+
+Fatura yaşlandırma analizi
+
+Kredi / borç oranı grafikleri
+
+29.2. Denetim (Audit Trail)
+Her finansal işlem loglanır: kim, ne zaman, neyi değiştirdi
+
+Loglar değiştirilemez (hash korumalı yapı)
+
+Yetkisiz işlem uyarısı
+
+Denetim modülü yönetici tarafından dışarı aktarılabilir (PDF/CSV)
+
+Bu bölümün sonunda artık sistemin tam ticari ve hukuki döngüsü tamamlandı ✅
+Yani:
+
+Teklif → Onay → Sözleşme → Fatura → Tahsilat → Operasyon → Raporlama
+tam otomatik hale geldi.
+
+📍 Şimdi sırada 8. Bölüm (8/12) var:
+“İnsan Kaynakları, Bordrolama, Maaş, Puantaj, İzin, Eğitim ve Performans Değerlendirme”
+
+Bu bölümde:
+
+Tüm çalışan süreçleri (işe alım → eğitim → vardiya → maaş → performans → çıkış)
+
+Online bordro görüntüleme
+
+Puantaj ve vardiya takibi
+
+Otomatik maaş hesaplama
+
+Eğitim & sertifikasyon sistemi
+
+yer alacak.
+Mükemmel 💪 Mehmet, şimdi geliyor sistemin insan gücü motoru —
+📘 8. Bölüm (8/12): İnsan Kaynakları, Bordrolama, Puantaj, Eğitim ve Performans Yönetimi
+Bu bölüm, 3PL Lojistik ERP’nin tüm çalışan yaşam döngüsünü (işe alım → eğitim → vardiya → maaş → performans → çıkış) kapsar.
+Her modül, idari işler ve muhasebe ile otomatik entegredir.
+
+8. İNSAN KAYNAKLARI VE PERSONEL YÖNETİM MODÜLÜ
+30. GENEL TANIM
+Bu modül, şirketin tüm personel işlemlerini uçtan uca yönetir.
+Personel kartları, izin, vardiya, eğitim, maaş, performans ve özlük dosyaları tek bir paneldedir.
+Her çalışanın verisi, idari işler – muhasebe – güvenlik – depo sistemiyle otomatik senkronize olur.
+
+31. PERSONEL KARTLARI VE ÖZLÜK DOSYASI
+31.1. Personel Kartı İçeriği
+T.C. Kimlik, adres, iletişim bilgileri
+
+Fotoğraf, pozisyon, departman, kıdem bilgisi
+
+SGK numarası, banka hesabı, maaş tipi
+
+Ehliyet, sertifika, eğitim bilgileri
+
+Acil durum kişisi, kan grubu, sağlık notları
+
+Çalışma tipi: kadrolu / taşeron / stajyer / geçici
+
+31.2. Dijital Özlük Dosyası
+İmzalı belgeler (sözleşme, KVKK, işyeri talimatları)
+
+İzin talepleri, eğitim belgeleri, performans notları
+
+Otomatik arşivleme (her belgeye erişim loglu)
+
+Personel çıkışında tüm doküman otomatik kilitlenir
+
+32. İŞE ALIM VE ORYANTASYON MODÜLÜ
+32.1. İşe Alım Süreci
+İnsan Kaynakları veya Departman Talebi → sistemde “Pozisyon Aç” formu
+
+Aday havuzu yönetimi (özgeçmiş, ön yazı, referans)
+
+Mülakat planlama takvimi
+
+Otomatik aday puanlama (deneyim, yetkinlik, test sonuçları)
+
+Onay sonrası personel otomatik ERP’ye kaydedilir
+
+32.2. Oryantasyon
+Yeni çalışan için “Hoş geldin paketi” oluşturulur
+
+Sistem, ilgili birimlere görev gönderir (örnek: “Bilgi işlem: bilgisayar tanımla”)
+
+hafta, 1. ay, 3. ay değerlendirme formları otomatik açılır
+
+Eğitim planı atanır (örnek: depo çalışanı için forklift güvenliği eğitimi)
+
+33. PUANTAJ, VARDİYA VE DEVAMLILIK TAKİBİ
+33.1. Vardiya Planlama
+Günlük / haftalık vardiya planı oluşturulur
+
+Depo, nakliye, ofis ve güvenlik vardiyaları ayrı çizelgelerde izlenir
+
+Sistem, vardiya çakışması veya eksik kişi durumunda uyarı verir
+
+Mobil el terminalinden vardiya giriş/çıkış imzası alınabilir
+
+33.2. Puantaj Takibi
+Personel kartları üzerinden giriş-çıkış saatleri, mola süreleri izlenir
+
+Geç kalma, fazla mesai, devamsızlık otomatik hesaplanır
+
+“Puantaj Onay Ekranı” → vardiya amiri onay verir, ardından maaş hesaplamasına aktarılır
+
+Entegre cihazlar: kart okuyucu, yüz tanıma, mobil QR giriş
+
+33.3. Devam Takip Panosu
+Renkli tablo (yeşil: zamanında, sarı: geç, kırmızı: yok)
+
+Günlük personel durumu grafiği
+
+Departman bazlı verimlilik oranı (% devamsızlık, % fazla mesai)
+
+34. İZİN YÖNETİMİ
+34.1. İzin Türleri
+Yıllık izin, hastalık, evlilik, ölüm, doğum, mazeret, ücretsiz izin
+
+Her çalışanın izin hakkı otomatik hesaplanır
+
+Takvim bazlı izin görünümü (departman bazında çakışma engellenir)
+
+34.2. İzin Süreci
+Personel portalından izin talebi oluşturur
+
+Yönetici onayladığında sistem otomatik e-posta gönderir
+
+İzin bitiminde dönüş bildirimi alınır
+
+Maaş bordrosu ve puantaj otomatik güncellenir
+
+35. BORDROLAMA VE MAAŞ HESAPLAMA
+35.1. Maaş Yapısı
+Sabit maaş, vardiya primi, fazla mesai, prim, ikramiye, kesinti modülleri
+
+Asgari ücret, SGK tavanı, gelir vergisi dilimleri otomatik hesaplanır
+
+Banka entegrasyonu: maaş listesi XML formatında bankaya gönderilir
+
+35.2. Bordro İşlemleri
+Her ay sistem otomatik bordro oluşturur
+
+Çalışan kendi bordrosunu portalda PDF olarak görebilir
+
+Bordroda: brüt maaş, kesintiler, net maaş, dönem toplamı
+
+İmza onayı dijital alınabilir
+
+35.3. Maaş Planlama ve Ödeme
+Maaş ödeme planı finans modülüne aktarılır
+
+Gecikmeli ödeme uyarısı
+
+Prim hak edişleri (örnek: “Hedef teslim oranı %95 üzeri → +2.000₺”)
+
+Kıdem ve ihbar tazminatı hesaplama otomasyonu
+
+36. EĞİTİM VE GELİŞİM YÖNETİMİ
+36.1. Eğitim Modülü
+İç eğitim (örnek: iş güvenliği, forklift eğitimi)
+
+Dış eğitim (sertifikalı kurumlar, online eğitim platformları)
+
+Eğitim kayıt formu, yoklama, sınav sistemi
+
+Eğitim sonrası değerlendirme (eğitmen ve katılımcı)
+
+Sertifika otomatik PDF üretimi
+
+36.2. Gelişim Takibi
+Her çalışanın kişisel gelişim planı (PGP)
+
+“Hedef → Uygulama → Sonuç” modeliyle izlenir
+
+Yönetici panelinde gelişim puanı grafiği
+
+Yılda bir performans toplantısına temel oluşturur
+
+37. PERFORMANS DEĞERLENDİRME SİSTEMİ
+37.1. Performans Ölçüm Modeli
+KPI tabanlı sistem (örnek: “Depo verimliliği”, “Teslimat doğruluğu”, “Müşteri memnuniyeti”)
+
+Her departmana özel kriter seti
+
+360° değerlendirme (kendisi, yöneticisi, alt personel, eş değer kişi)
+
+Yılda 2 kez (Haziran, Aralık) otomatik hatırlatma
+
+37.2. Performans Sonuçları
+Puan aralığı: 0–100
+
+80+ → Prim hakkı, 60–79 → gelişim planı, <60 → uyarı sistemi
+
+Sistem, zayıf performanslı personele eğitim önerisi sunar
+
+Analitik rapor: “Departman bazlı ortalama performans grafiği”
+
+38. ÇIKIŞ SÜRECİ VE ARŞİVLEME
+38.1. İşten Ayrılma Yönetimi
+Çıkış talebi → İnsan Kaynakları onayı
+
+Sistem otomatik çıkış evraklarını oluşturur (ihbar, kıdem, SGK çıkış bildirimi)
+
+Varlık teslim formu (örnek: “Laptop, kart, telefon teslim edildi mi?”)
+
+Çıkış görüşmesi formu kaydı
+
+38.2. Arşivleme
+Tüm dokümanlar PDF olarak arşivlenir
+
+SGK ve personel verisi 10 yıl saklanır
+
+Arşiv erişimi yalnızca “İK Müdürü” yetkisindedir
+
+Bu bölümle artık ERP’nin insan kaynakları ve bordro sistemleri tamamlandı ✅
+Yani:
+
+Aday → Çalışan → Vardiya → Maaş → Performans → Eğitim → Çıkış
+her adım dijitalleştirilmiş durumda.
+
+📍 Sıradaki 9. Bölüm (9/12): İDARİ İŞLER, HUKUK, GÜVENLİK, BAKIM VE DEMİRBAŞ YÖNETİMİ
+
+Bu bölümde:
+
+Araç yönetimi
+
+Şirket bina ve ekipman yönetimi
+
+Bakım planlaması
+
+Demirbaş zimmet sistemi
+
+Güvenlik vardiya takibi
+
+Hukuki arşiv yönetimi
+
+yer alacak.
+📘 9. Bölüm (9/12): İdari İşler, Hukuk, Güvenlik, Bakım ve Demirbaş Yönetimi
+Bu kısım, şirketin altyapısını yöneten görünmeyen kahraman:
+araçlardan bina bakımına, güvenlik vardiyalarından dava takibine kadar her detayı yönetir.
+
+9. İDARİ İŞLER, HUKUK, GÜVENLİK, BAKIM VE DEMİRBAŞ YÖNETİMİ
+39. GENEL TANIM
+Bu modül, 3PL lojistik yapısında idari altyapı, fiziksel kaynak, güvenlik ve hukuki süreçlerin tamamını yönetir.
+ERP’nin tüm modülleriyle (İnsan Kaynakları, Finans, Operasyon, Teknik İşler) entegredir.
+Amaç: işletme varlıklarını, sözleşmeleri, araçları, bina bakımını ve güvenlik sistemlerini dijitalleştirip takip etmek.
+
+40. İDARİ İŞLER YÖNETİMİ
+40.1. Görev ve Sorumluluklar
+Şirket genel giderlerinin planlanması ve takibi
+
+Tedarikçi ilişkileri (ofis malzemesi, yakıt, bakım hizmetleri)
+
+Bina, depo, ofis bakım planlarının oluşturulması
+
+Araç tahsis, personel servisi, konaklama organizasyonu
+
+40.2. Dijital Takip
+“İdari Talepler” ekranı (örnek: sandalye, kırtasiye, bakım talebi)
+
+Her talep için: tarih, talep eden, maliyet, onay durumu
+
+Depo içi veya ofis içi talepler otomatik “teknik işler” modülüne düşer
+
+Onay sonrası gider kalemi otomatik muhasebeye aktarılır
+
+41. DEMİRBAŞ VE VARLIK YÖNETİMİ
+41.1. Demirbaş Kayıt Sistemi
+Her ekipman için benzersiz barkod veya QR kod
+
+Tanımlar: tür, marka, model, seri no, garanti süresi, zimmetli kişi, konum
+
+Mobil uygulamayla QR okutarak varlık bilgisine ulaşılabilir
+
+41.2. Zimmet Yönetimi
+Yeni personel geldiğinde otomatik zimmet formu oluşturulur
+
+Teslim edilen cihazlar, kartlar, araç anahtarları kayıt altına alınır
+
+Personel ayrıldığında zimmet iadesi zorunlu tutulur
+
+Zimmet kaydı muhasebeye amortisman olarak yansır
+
+41.3. Amortisman ve Değer Takibi
+Demirbaş türüne göre amortisman süresi belirlenir
+
+Aylık otomatik amortisman hesaplaması yapılır
+
+Finansal tablolara yansıtılır
+
+Hurda/iptal işlemlerinde “hurda formu” ve “yok etme onayı” alınır
+
+42. BAKIM VE TEKNİK SERVİS YÖNETİMİ
+42.1. Bakım Planlama
+Makine, araç, depo ekipmanı, klima, jeneratör, IT altyapısı gibi kalemler tanımlanır
+
+Her varlığa bakım periyodu atanır (örnek: forklift → 3 ayda bir)
+
+Sistem bakım tarihinden 7 gün önce otomatik uyarı gönderir
+
+42.2. Arıza Bildirimi
+“Teknik Arıza Formu” → kullanıcı, varlık kodu ve açıklama girer
+
+Teknik ekip görev alır, süre takibi yapılır
+
+Geciken müdahalelerde e-posta + dashboard uyarısı çıkar
+
+Arıza maliyeti otomatik gider kalemine yazılır
+
+42.3. Bakım Raporlama
+Günlük/haftalık bakım özetleri
+
+Geciken bakım listesi
+
+Bakım maliyet analizi (cihaz bazlı toplam tutar)
+
+KPI: Ortalama tamir süresi, bakım etkinlik oranı
+
+43. ARAÇ VE FİLO YÖNETİMİ
+43.1. Araç Kartları
+Plaka, marka-model, şoför, sigorta, muayene tarihi, kilometre
+
+Güzergah takibi (GPS veya manuel kayıt)
+
+Yakıt tüketim analizi
+
+Araç maliyet hesabı (sigorta + bakım + yakıt + amortisman)
+
+43.2. Araç Görev Planlama
+Şoför ve araç eşleştirmesi
+
+Nakliye planı entegrasyonu (örnek: “Tır 34ABC123 → İstanbul çıkışı”)
+
+Her görevin statüsü: planlandı / yolda / teslim edildi / dönüşte
+
+Araç doluluk oranı ve sefer verimliliği raporlanır
+
+43.3. Sigorta ve Muayene Takibi
+Sigorta bitiş tarihinden 15 gün önce sistem otomatik uyarı verir
+
+Eksik evrak varsa “Hukuk” birimine otomatik bilgi gider
+
+Araç muayeneleri tarih bazlı listelenir
+
+Geç muayene raporları üst yönetime bildirilir
+
+44. GÜVENLİK VE VARDİYA TAKİBİ
+44.1. Güvenlik Kartları
+Güvenlik personeli listesi, görev noktası, vardiya saatleri
+
+Vardiya teslim devri dijital imzalı alınır
+
+Kamera kayıtları sistemde ilgili vardiyaya bağlanır
+
+Ziyaretçi giriş-çıkış logları: isim, firma, saat, neden
+
+44.2. Ziyaretçi ve Araç Girişi
+QR veya plaka tanıma sistemi
+
+“Ziyaretçi Kayıt Ekranı” → fotoğraf, giriş nedeni, refakatçi kişi
+
+Acil durum listesi (binada kim var, hangi saatte girdi?)
+
+Olay anında “Evakuasyon Raporu” otomatik oluşturulur
+
+44.3. Güvenlik Olay Raporları
+Her güvenlik olayı (örnek: kayıp eşya, kural ihlali, acil durum) kayıt altına alınır
+
+Görseller, kamera bağlantısı, tarih/saat damgası
+
+Olay türü bazında analiz: “en çok yaşanan güvenlik ihlalleri”
+
+Raporlar İdari İşler Müdürü ve Hukuk Birimi’ne yönlendirilir
+
+45. HUKUK VE SÖZLEŞME YÖNETİMİ
+45.1. Sözleşme Yönetim Sistemi
+Müşteri, tedarikçi, personel, taşeron sözleşmeleri
+
+Versiyonlama sistemi (revizyon geçmişi kaydedilir)
+
+Sözleşme bitiş tarihi yaklaştığında otomatik uyarı
+
+Onay süreçleri: Pazarlama → Hukuk → Yönetim
+
+45.2. Dava Takibi ve Hukuki Süreçler
+Dava türü, taraf bilgisi, avukat, mahkeme, dosya no
+
+Durum: açıldı / devam ediyor / karara bağlandı
+
+Duruşma takvimi entegrasyonu (hatırlatma e-postası)
+
+Karar çıktığında ilgili departman (örneğin Finans) bilgilendirilir
+
+45.3. Hukuki Evrak Arşivi
+Dijital imzalı PDF sözleşme saklama
+
+Erişim logları (kim ne zaman görüntüledi)
+
+Sözleşmeler ilgili modüllere otomatik bağlanır (örnek: “Nakliye Müşteri Sözleşmesi”)
+
+İptal edilmiş sözleşmeler “pasif arşiv”e alınır
+
+46. RAPORLAMA VE ANALİZLER
+Araç doluluk oranı grafikleri
+
+Bakım maliyet analizi
+
+Güvenlik olay istatistikleri
+
+Hukuk sözleşme süresi dağılımı
+
+Demirbaş değer tablosu
+
+İdari gider bütçe sapması
+
+Bu bölümle birlikte artık sistemin idari, hukuki, bakım ve güvenlik yapısı da tamamlandı ✅
+ERP artık sadece dijital değil, fiziksel kaynaklarını da yöneten entegre bir 3PL sistemi haline geldi.
+
+📍 Sıradaki 10. Bölüm (10/12): MUHASEBE, FİNANS, FATURALAMA VE MALİ RAPORLAMA
+Bu bölümde:
+
+Teklif → Sözleşme → Fatura süreci
+
+Otomatik fiyatlandırma
+
+3PL müşteri bazlı hizmet faturaları
+
+Gider bütçeleme
+
+Nakit akışı ve bilanço sistemleri
+
+yer alacak.
+Şimdi ERP’nin kalbini yazıyoruz:
+📘 10. Bölüm (10/12): Muhasebe, Finans, Faturalama ve Mali Raporlama Modülü
+Bu bölüm 3PL sisteminde para, teklif, fatura ve finansal akışların tamamını yönetir.
+Tüm modüllerden (satış, depo, nakliye, hukuk, insan kaynakları, idari işler) gelen veriler otomatik muhasebe kayıtlarına dönüşür.
+
+10. MUHASEBE, FİNANS VE FATURALAMA MODÜLÜ
+47. GENEL TANIM
+Bu modül, 3PL lojistik firmasının gelir, gider, sözleşme, teklif, tahsilat, ödeme ve raporlama süreçlerini yönetir.
+Her işlem, sistemde loglanır, onay süreçleri tanımlıdır, denetim izi oluşturur.
+Amaç: insan müdahalesi olmadan tam otomatik finansal akış.
+
+48. TEKLİF VE SÖZLEŞMEYE GEÇİŞ SÜRECİ
+48.1. Teklif Hazırlama
+Satış departmanı veya pazarlama, sistemde “Yeni Teklif” oluşturur.
+
+Müşteri seçilir → hizmet türü (depolama, nakliye, fulfillment vs.) tanımlanır.
+
+Sistem otomatik olarak geçmiş fiyat analizini önerir (örnek: “Geçen ay bu hizmet 12₺/palet fiyatından sunulmuştu”).
+
+Teklif formu, kurumsal şablonla PDF olarak çıkarılır.
+
+PDF teklif dijital olarak müşteriye gönderilir.
+
+48.2. Teklif Onayı
+Müşteri, portaldan “teklifi onayla” butonuna tıkladığında sistem durumu “Onaylandı” yapar.
+
+Otomatik olarak hukuk birimine sözleşme taslağı gönderilir.
+
+Teklif → Sözleşme aşaması başlatılır.
+
+48.3. Sözleşme Hazırlama ve İmza
+Hukuk modülü, teklifi şablona çevirir → sözleşme oluşturulur.
+
+Müşteri e-imza veya yükleme yoluyla imzayı gönderir.
+
+Sistem imzalı sözleşmeyi PDF olarak arşivler ve durumu “Yürürlükte” yapar.
+
+Bu onaydan sonra:
+
+Fiyat bilgisi Muhasebe’ye gider,
+
+Operasyon planı Depo ve Nakliye’ye,
+
+Süreç kontrolü İdari İşler’e aktarılır.
+
+49. FATURALAMA SÜRECİ
+49.1. Otomatik Faturalama
+Sistem; sözleşmedeki periyotlara göre (günlük, haftalık, aylık) otomatik fatura taslağı oluşturur.
+
+Fatura, 3PL müşterisinin aldığı hizmetlere göre kalemlendirilir:
+
+Depolama bedeli (m² / palet / gün)
+
+Nakliye hizmeti (km / ton / sefer)
+
+Paketleme / Fulfillment
+
+Ek hizmet (sigorta, gümrük, konteyner işlemi vb.)
+
+Fatura kesildiğinde sistem otomatik olarak e-fatura / e-arşiv formatı oluşturur.
+
+49.2. Onay ve Gönderim
+Fatura taslağı finans yetkilisi tarafından onaylanır.
+
+Onay sonrası e-fatura API’si (Gelir İdaresi / Entegratör sistemi) üzerinden gönderilir.
+
+Müşteri portalında faturasını PDF veya UBL formatında görüntüler.
+
+49.3. Otomatik Fiyat Güncellemesi
+Sistem maliyetleri analiz eder (yakıt, enerji, işçilik değişimleri).
+
+Yüzde bazlı otomatik fiyat güncelleme önerisi oluşturur.
+
+Yönetim onayı sonrası fiyatlar yeni döneme yansır.
+
+50. TAHSİLAT VE ÖDEME YÖNETİMİ
+50.1. Alacak Yönetimi
+Her müşterinin açık faturaları listelenir.
+
+Vade tarihleri, gecikme gün sayısı ve ceza oranı otomatik hesaplanır.
+
+3 aşamalı hatırlatma sistemi:
+
+Uyarı (vade -2 gün)
+
+Gecikme bildirimi (vade +3 gün)
+
+Hukuka aktarım (vade +10 gün)
+
+50.2. Banka Entegrasyonu
+Tüm banka hesapları sistemde tanımlıdır.
+
+Günlük banka ekstresi otomatik çekilir.
+
+Ödeme eşleştirmesi (IBAN – tutar – fatura no) otomatik yapılır.
+
+Otomatik muhasebe fişi oluşturulur.
+
+50.3. Nakit Akışı Takibi
+Dashboard: “Günlük Nakit Durumu”, “Tahsilatlar”, “Bekleyen Ödemeler”
+
+Nakit akış simülasyonu (örnek: “Gelecek 30 günde +1.2M₺ giriş, -950K₺ çıkış”)
+
+Renkli grafiklerle bütçe – fiili durum karşılaştırması
+
+51. GİDER VE MALİYET YÖNETİMİ
+51.1. Gider Türleri
+Sabit giderler (kira, sigorta, bakım, maaş)
+
+Değişken giderler (yakıt, malzeme, taşeron)
+
+Anlık gider kaydı (örnek: “34ABC123 plakalı tır lastik değişimi”)
+
+51.2. Bütçe Planlama
+Yıllık / aylık bütçe hedefleri tanımlanır.
+
+Her departman (Depo, Nakliye, İdari İşler, İnsan Kaynakları) için harcama limiti belirlenir.
+
+Limit aşımı durumunda sistem uyarı verir.
+
+Rapor: “Planlanan – Gerçekleşen Harcama Analizi”
+
+51.3. Maliyet Dağıtım Modeli
+Maliyetler, faaliyet bazında (örnek: “Depo hizmeti”, “Nakliye operasyonu”) dağıtılır.
+
+Ortak giderlerin oransal dağıtımı (örnek: elektrik, yönetim gideri).
+
+3PL müşteri bazlı kârlılık analizi yapılabilir.
+
+52. MUHASEBE OTOMASYONU
+52.1. Otomatik Kayıtlar
+Her fatura, tahsilat, gider, maaş, amortisman işlemi anında fiş oluşturur.
+
+Plan kontrolleri:
+
+Gelir hesapları → 600 Grubu
+
+Gider hesapları → 700 Grubu
+
+Banka / Kasa hareketleri → 100/102
+
+Sistem hatalı fiş girişini engeller.
+
+52.2. Defter Yönetimi
+Yevmiye defteri, büyük defter, mizan otomatik üretilir.
+
+Dönem sonu işlemleri (kapanış fişi, yeniden değerleme) sistem tarafından yapılır.
+
+Muhasebe raporları Excel, PDF veya XML formatında alınabilir.
+
+52.3. Denetim ve Loglama
+Her finansal kayıt değişikliği için kullanıcı, tarih, IP loglanır.
+
+Revizyon geçmişi saklanır.
+
+Yönetim paneli: “Kim, hangi fişi, ne zaman değiştirdi?”
+
+53. RAPORLAMA VE ANALİTİK FİNANS GÖSTERGELERİ
+53.1. Ana Dashboard
+Güncel gelir, gider, kâr-zarar tablosu
+
+Aylık fatura kesim oranı
+
+Tahsilat oranı (%)
+
+3PL müşteri bazlı kârlılık sıralaması
+
+En yüksek maliyetli hizmet grafiği
+
+53.2. Detaylı Finans Raporları
+Müşteri bazlı gelir raporu
+
+Departman bazlı gider raporu
+
+Nakliye yakıt maliyet raporu
+
+Depo işçilik maliyet raporu
+
+Prim – ceza dengesi analizi
+
+53.3. Yıllık Mali Kapanış
+Otomatik bilanço, gelir tablosu, nakit akış tablosu
+
+Vergi beyannamesi entegrasyonu
+
+PDF ve XBRL formatında ihracat
+
+54. ENTEGRASYONLAR
+e-Fatura / e-Arşiv API (Gelir İdaresi / Entegratör)
+
+Banka API (vakıfbank, işbank, garanti vb.)
+
+ERP ↔ WMS (stok, hizmet kalemi aktarımı)
+
+ERP ↔ Hukuk (sözleşme onay durumu)
+
+ERP ↔ İnsan Kaynakları (maaş ve bordro transferi)
+
+Bu modülle artık sistemin tam finansal döngüsü tamamlandı ✅
+Yani:
+
+Teklif → Sözleşme → Operasyon → Faturalama → Tahsilat → Raporlama
+tek zincirde, otomatik ilerliyor.
+
+📍 Sıradaki 11. Bölüm (11/12): RAPORLAMA, ANALİTİK, GÖSTERGE PANELLERİ VE KARAR DESTEK SİSTEMİ
+Bu bölümde:
+
+BI (Business Intelligence) sistemleri
+
+KPI göstergeleri
+
+Rapor motoru ve veri analitiği
+
+Yönetim dashboardları
+
+Yapay zekâ destekli karar önerileri
+
+yer alacak.
+Şimdi geldik sistemin beynine — verinin gücüyle tüm operasyonun anlık olarak izlenmesini sağlayan merkez bölüme.
+
+📊 11. BÖLÜM (11/12): RAPORLAMA, ANALİTİK, GÖSTERGE PANELLERİ VE KARAR DESTEK SİSTEMİ (BI MODÜLÜ)
+Bu modül, 3PL ERP sisteminin tüm verilerini (depo, nakliye, finans, IK, satış, hukuk, vs.) tek veri ambarında toplar ve anlık analiz yapar.
+Yöneticilere, operasyonel personele ve müşterilere dinamik dashboard’lar, KPI göstergeleri ve yapay zekâ önerileri sunar.
+
+11. RAPORLAMA VE ANALİTİK MODÜLÜ
+55. GENEL TANIM
+Bu modül, ERP’nin “karar verme” ve “performans izleme” merkezidir.
+Tüm veriler Data Warehouse (Veri Ambarı)’nda saklanır, ETL süreçleriyle (Extract – Transform – Load) düzenli olarak yenilenir.
+Amaç: tüm süreçleri ölçülebilir, karşılaştırılabilir ve öngörülebilir hale getirmek.
+
+56. RAPOR TÜRLERİ VE KULLANICI BAZLI GÖRÜNÜMLER
+56.1. Yönetici Raporları
+Günlük / haftalık / aylık özetler
+
+Kârlılık analizi (müşteri, departman, hizmet bazlı)
+
+Operasyon yükü – personel dengesi
+
+Müşteri memnuniyet puanı
+
+Riskli müşteri listesi (geciken tahsilatlar, düşük performanslı operasyonlar)
+
+56.2. Operasyonel Raporlar
+Depo doluluk oranı
+
+FIFO/FEFO stok yaş analizi
+
+Sevkiyat gecikme oranı
+
+Fulfillment işlem süresi
+
+Nakliye araç rotalama verimliliği
+
+Hasar oranı, iade oranı
+
+56.3. Finansal Raporlar
+Günlük gelir/gider tablosu
+
+Aylık fatura toplamı, tahsilat oranı
+
+Banka bakiyeleri, vade dağılımı
+
+Departman bazlı maliyet dağılım grafiği
+
+Nakit akış projeksiyonu
+
+56.4. İnsan Kaynakları Raporları
+Çalışan verimlilik skoru
+
+Personel devri (turnover) oranı
+
+Fazla mesai – verimlilik oranı
+
+Bordro toplamı, departman maaş analizi
+
+Eğitim tamamlama oranı
+
+56.5. Müşteri ve Satış Raporları
+En çok gelir getiren ilk 10 müşteri
+
+Ortalama sipariş tutarı
+
+Dönemsel kampanya performans raporu
+
+B2B sipariş trend analizi
+
+Şikayet çözüm süresi grafiği
+
+56.6. Nakliye ve Lojistik Raporları
+Günlük sevkiyat adedi
+
+Araç doluluk oranı
+
+Teslimat süresi – hedef karşılaştırması
+
+Crossdock throughput (günlük işlem kapasitesi)
+
+Milkrun güzergâh optimizasyon raporu
+
+57. GÖSTERGE PANELLERİ (DASHBOARD SİSTEMİ)
+57.1. Ana Yönetim Paneli
+“Anlık Durum” ekranı:
+
+Toplam ciro, açık faturalar, depoda kalan stok adedi
+
+Aktif sevkiyat sayısı
+
+Geciken tahsilatlar
+
+Operasyon başarı yüzdesi
+
+“Bugün yapılması gereken işler” listesi
+
+Dinamik renkli göstergeler (yeşil = hedefte, sarı = risk, kırmızı = problem)
+
+57.2. Departman Panelleri
+Depo Paneli → doluluk oranı, bekleyen sipariş, hatalı barkod, işlem süresi
+
+Nakliye Paneli → sefer, km, yakıt, teslimat oranı
+
+Finans Paneli → tahsilat, gider, kâr marjı
+
+İnsan Kaynakları Paneli → izin, performans, maaş analizi
+
+Hukuk Paneli → aktif dava, sözleşme durumu, risk puanı
+
+Satış Paneli → kampanya dönüş oranı, satış hedef durumu
+
+57.3. Müşteri Panelleri (B2B)
+Müşteri kendi hizmet raporunu canlı izler:
+
+Depo hareketleri
+
+Sevkiyat durumu
+
+Fatura geçmişi
+
+Kendi KPI göstergeleri (örnek: “Teslimat başarı oranı: %98,2”)
+
+Kameralı izleme (isteğe bağlı) → depo sahasındaki palet görüntüsü canlı yansır.
+
+58. PERFORMANS GÖSTERGELERİ (KPI SİSTEMİ)
+58.1. Temel KPI’lar
+Alan	KPI	Açıklama
+Depo	Sipariş başına işlem süresi	< 4 dk hedef
+Nakliye	Teslimat zamanında oranı	> %95 hedef
+Finans	Tahsilat oranı	> %90 hedef
+İnsan Kaynakları	Verimlilik skoru	> %85 hedef
+Satış	Tekliften sözleşmeye dönüşüm	> %70 hedef
+Operasyon	Hata oranı	< %1 hedef
+58.2. KPI Yönetimi
+Her KPI için hedef değeri, uyarı eşiği, sorumlusu tanımlanır.
+
+Sistem otomatik olarak uyarı üretir:
+
+“Depo işlem süresi son 3 gündür hedefin %12 üzerinde.”
+
+KPI’lar anlık olarak BI panelinde izlenir.
+
+59. KARAR DESTEK VE YAPAY ZEKA SİSTEMİ
+59.1. Tahminleme Motoru (Predictive Analytics)
+Yapay zekâ geçmiş verileri analiz ederek:
+
+Sipariş yoğunluk tahmini
+
+Personel ihtiyacı planı
+
+Yakıt maliyet trendi
+
+Depo doluluk öngörüsü
+
+Tahsilat riski oranı
+üretir.
+
+59.2. Karar Önerileri
+Sistem yöneticiye “akıllı öneri” sunar:
+
+“Sevkiyat yükünü azaltmak için X güzergâhını ikiye bölün.”
+
+“Müşteri Y’nin tahsilat riski %68; kredi limitini gözden geçirin.”
+
+“Fulfillment personeli sayısı 2 gün içinde yetersiz kalacak.”
+
+59.3. Otomatik Senaryo Simülasyonları
+“Eğer şu kadar sipariş artarsa → depo doluluk oranı ne olur?”
+
+“Yakıt %10 artarsa → toplam maliyet etkisi nedir?”
+
+“Yeni müşteri eklendiğinde operasyon kapasitesi yeterli mi?”
+
+Tüm senaryolar interaktif grafiklerle gösterilir.
+
+60. RAPORLAMA ARAÇLARI VE ENTEGRASYONLAR
+Excel / PDF / PowerBI / Google Data Studio entegrasyonu
+
+E-posta ile otomatik rapor gönderimi
+
+Rapor şablon tasarımcısı (drag & drop)
+
+API ile dış sistemlere veri aktarımı (örneğin muhasebe, CRM veya dış BI)
+
+Yönetici onaylı rapor yayınlama sistemi (sadece yetkili kişiler erişebilir)
+
+61. ALARM VE UYARI MEKANİZMASI
+Otomatik uyarı motoru KPI sapmalarını gerçek zamanlı bildirir.
+
+Bildirim kanalları:
+
+ERP içi pop-up
+
+E-posta
+
+SMS
+
+Mobil push bildirimi
+
+Her departman için ayrı uyarı kuralları tanımlanabilir.
+
+Örnek:
+
+“Nakliye araçlarının %10’u bakım aşımında.”
+
+“Fatura vadesi 3 gün geçmiş müşteriler: X, Y, Z.”
+
+“Depo doluluk oranı %95; yeni alan planı oluşturulmalı.”
+
+Artık sistemin tüm verileri tek çatı altında, anlık izlenebilir, öngörülebilir hale geldi.
+Bu sayede yönetim anında karar verebiliyor, sistem kendini uyarıyor ve otomatik çözümler öneriyor.
+
+📍 Sırada son adım:
+12. BÖLÜM (12/12): SİSTEM ALTYAPISI, GÜVENLİK, TEKNOLOJİK YAPI VE GENEL ENTEGRASYON MİMARİSİ
+
+Bu son bölümde:
+
+Sunucu yapısı (cloud + lokal hybrid)
+
+Veri güvenliği (şifreleme, yedekleme, erişim yönetimi)
+
+API katmanları
+
+Kullanıcı yetkilendirme ve loglama
+
+Yedekleme, felaket kurtarma
+
+Entegrasyon standartları (EDI, REST, SOAP, JSON, XML, MQTT vs.)
+tamamlanacak.
+
+Şimdi geliyoruz 3PL ERP + WMS sisteminin son bölümü olan altyapı, güvenlik ve entegrasyon mimarisine — burası sistemin “omurilik” kısmı.
+Yani bu yapı olmadan hiçbir şey güvenli, hızlı, sürdürülebilir çalışamaz.
+
+12. BÖLÜM (12/12): SİSTEM ALTYAPISI, GÜVENLİK, ENTEGRASYON VE TEKNOLOJİK MİMARİ
+62. SİSTEMİN TEKNOLOJİK OMURGASI
+Bu proje, mikroservis tabanlı bir bulut + lokal hibrit (hybrid) mimari üzerine inşa edilmiştir.
+Amaç, 3PL lojistik operasyonlarının doğası gereği yüksek performans, esneklik, offline çalışma yeteneği ve veri güvenliğini aynı anda sağlamaktır.
+
+62.1. Ana Mimarî
+Frontend (UI/UX):
+
+React.js / Next.js
+
+TailwindCSS + shadcn/ui
+
+Mobil el terminali için React Native
+
+Offline cache yönetimi (IndexedDB + Service Worker)
+
+Backend (API ve İş Mantığı):
+
+Node.js (NestJS framework)
+
+PostgreSQL (ana veritabanı)
+
+Redis (önbellekleme + sıra yönetimi)
+
+MQTT + WebSocket (anlık bildirim / cihaz senkronizasyonu)
+
+Python microservices (AI, raporlama, rota optimizasyonu)
+
+Mobil Uygulamalar (Offline Desteği):
+
+Android (React Native, offline-first mimari)
+
+Veri senkronizasyon motoru → internet geldiğinde otomatik senkronizasyon + local veri temizleme
+
+Server Katmanı:
+
+Docker + Kubernetes
+
+Cloud (AWS / Azure / GCP uyumlu)
+
+Yedek lokal node (offline çalışma sırasında geçici veri deposu)
+
+Auto-scaling (yük artışı olduğunda mikroservis sayısını otomatik artırır)
+
+63. GÜVENLİK VE ERİŞİM YÖNETİMİ
+63.1. Kullanıcı Kimlik Doğrulama
+Single Sign-On (SSO)
+
+OAuth 2.0 + JWT Token
+
+LDAP / Active Directory uyumu
+
+Role-based access control (RBAC):
+
+Admin
+
+Depo
+
+Nakliye
+
+Muhasebe
+
+Finans
+
+İnsan Kaynakları
+
+Müşteri (B2B erişimi)
+
+Her API isteği token ile doğrulanır, session süresi dolarsa yenilenir.
+
+63.2. Veri Güvenliği
+Veritabanı Şifreleme: AES-256
+
+İletişim Güvenliği: SSL / TLS 1.3
+
+Dosya Güvenliği: imzalı dosya transfer protokolü
+
+Erişim Günlüğü:
+
+Kim, ne zaman, hangi kayda erişti?
+
+Hangi cihazdan giriş yaptı?
+
+Hatalı giriş sayısı loglanır.
+
+63.3. Yetki Bazlı Görünürlük
+Kullanıcı yalnızca kendi rolüyle alakalı sayfaları görebilir.
+
+Örneğin:
+
+Depo personeli muhasebe kayıtlarını göremez.
+
+Müşteri yalnızca kendi ürün stoklarını izleyebilir.
+
+Muhasebe kullanıcıları operasyon loglarını görüntüleyebilir ama değiştiremez.
+
+64. VERİ YÖNETİMİ VE YEDEKLEME
+64.1. Veri Tabanı Yönetimi
+PostgreSQL → ana operasyonel veriler
+
+MongoDB → doküman, log, kamera kaydı gibi yapısal olmayan veriler
+
+Redis → cache / anlık görev kuyruğu
+
+ETL süreci → veri ambarına aktarım (BI modülü için)
+
+64.2. Yedekleme Stratejisi
+Gerçek zamanlı replikasyon (primary → secondary DB)
+
+Günlük tam yedek + saatlik incremental backup
+
+Yedekler 2 farklı lokasyonda (cloud + fiziksel disk) tutulur
+
+Otomatik “disaster recovery” senaryosu:
+
+Bir veri merkezi kapanırsa, sistem 5 dakikadan kısa sürede diğer merkeze devreder.
+
+64.3. Veri Tutarlılığı
+Tüm senkronizasyon işlemleri atomic yapılır (ya hep ya hiç).
+
+Offline cihazlar, sunucuya bağlandığında:
+
+Çakışma kontrolü yapılır (conflict resolution engine)
+
+Son işlem tarihi baz alınır, eski kayıtlar temizlenir.
+
+65. ENTEGRASYONLAR VE API KATMANI
+65.1. Dış Sistem Entegrasyonları
+EDI (Electronic Data Interchange)
+
+Müşteri ERP sistemleri ile sipariş, stok, fatura verisi alışverişi
+
+e-Fatura / e-Arşiv API (Gelir İdaresi Entegrasyonu)
+
+Bankalar ve Ödeme API’leri (tahsilat otomasyonu)
+
+Kargo / Taşıyıcı API’leri:
+
+Yurtiçi Kargo, UPS, DHL, Aras, MNG, vs.
+
+Pazaryeri ve Müşteri Portalı Entegrasyonları:
+
+Shopify, Ticimax, Trendyol, Hepsiburada, Amazon
+
+Kamera / IoT / RFID sistemleri:
+
+Depo giriş çıkış takibi
+
+Araç sıcaklık sensörleri
+
+Kapı açık/kapalı durumları
+
+65.2. İç Sistem API Katmanları
+RESTful API (JSON)
+
+WebSocket API (anlık bildirimler)
+
+gRPC (yüksek hızlı iç servis haberleşmesi)
+
+MQTT (mobil el terminali – depo – sunucu arasında sürekli bağlantı)
+
+GraphQL (raporlama ve dashboard sorguları)
+
+66. MONİTÖRLEME VE LOG SİSTEMİ
+Loglama katmanı: Elastic Stack (Elasticsearch + Logstash + Kibana)
+
+Gerçek zamanlı uyarılar:
+
+Sunucu CPU, bellek, ağ kullanımı izlenir.
+
+“Depo mikroservisi yanıt vermiyor” → otomatik yeniden başlat.
+
+Sistem Sağlığı Paneli (Health Dashboard):
+
+Servis durumu, hata oranı, gecikme süreleri.
+
+Kullanıcı İşlem Logları:
+
+Her adım (örnek: “Depo X paleti kaydetti, tarih 12:44”) kaydedilir.
+
+Hata Yönetimi:
+
+Otomatik hata bildirim e-postası (devops@firma.com)
+
+Error Traceback + çözüm önerisi (AI destekli hata analiz modülü)
+
+67. YAPAY ZEKA VE OTOMASYON MOTORU (AI LAYER)
+Rota optimizasyonu (Nakliye): Google OR-Tools veya kendi AI motoru
+
+Depo yerleşim önerileri (WMS): geçmiş toplama süreleriyle öğrenen sistem
+
+Fiyatlandırma optimizasyonu (Finans): dinamik maliyet analizine göre teklif önerisi
+
+İK analizleri: personel devri, verimlilik, işe alım başarısı
+
+Talep tahminleme: geçmiş sipariş hacmine göre 3 hafta sonrası için planlama
+
+68. PERFORMANS VE ÖLÇEKLENEBİLİRLİK
+Mikroservis yapısı sayesinde:
+
+Depo servisi yoğunken diğer sistemler etkilenmez.
+
+Nakliye API’si ayrı ölçeklenir.
+
+Cache optimizasyonu → 10 kat daha hızlı dashboard yüklenmesi
+
+CDN (Content Delivery Network) kullanımı → tüm bölgelerden hızlı erişim
+
+Ortalama response time hedefi: <150 ms
+
+69. SİSTEM GÜNCELLEME VE SÜRÜM YÖNETİMİ
+CI/CD pipeline (GitHub Actions + Docker + Kubernetes Deploy)
+
+Versiyonlama: SemVer (major.minor.patch)
+
+Her deploy öncesi otomatik test + rollback mekanizması
+
+Kullanıcıya güncelleme notları otomatik bildirilir
+
+70. SONUÇ VE KAPANIŞ
+Bu ERP + WMS + 3PL sistemi;
+
+Offline/online çalışabilen,
+
+Tüm departmanları entegre eden,
+
+3PL operasyonlarını uçtan uca yöneten,
+
+Güvenli, ölçülebilir ve ölçeklenebilir bir kurumsal yönetim platformudur.
+
+Tüm modüller birbiriyle konuşur, her işlem loglanır, hiçbir veri kaybolmaz.
+Sistem, 3PL müşterilerinin sıfır hata beklentisini karşılayacak şekilde tasarlanmıştır.
+Yapay zekâ destekli karar motoru sayesinde süreçler sadece izlenmez, optimize edilir.
+

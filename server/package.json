@@ -1,0 +1,41 @@
+{
+  "name": "ayaz-lojistik-erp-server",
+  "version": "1.0.0",
+  "description": "Ayaz Lojistik ERP Backend API",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "jest",
+    "migrate": "knex migrate:latest",
+    "seed": "knex seed:run"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.3.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "joi": "^17.9.2",
+    "knex": "^2.5.1",
+    "pg": "^8.11.3",
+    "redis": "^4.6.7",
+    "amqplib": "^0.10.3",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.0",
+    "nodemailer": "^6.9.4",
+    "winston": "^3.10.0",
+    "compression": "^1.7.4",
+    "express-rate-limit": "^6.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "jest": "^29.6.2",
+    "supertest": "^6.3.3"
+  },
+  "keywords": ["erp", "logistics", "warehouse", "transportation"],
+  "author": "Ayaz Lojistik",
+  "license": "MIT"
+}

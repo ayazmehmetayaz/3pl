@@ -1,0 +1,1199 @@
+﻿ERP_WMS_01_Kurulum_ve_Altyapi.txt
+1. GENEL TANIM
+Bu doküman, Ayaz Lojistik tarafından geliştirilen ERP + WMS + B2B + 3PL sisteminin kurulum, altyapı ve bakım standartlarını tanımlar.
+Amaç, sistemin hem stabil, hem güvenli, hem de ölçeklenebilir bir yapıda kurulmasını sağlamaktır.
+Tüm kurulumlar lokal veya bulut tabanlı (on-prem / cloud hybrid) olarak desteklenir.
+
+2. SİSTEM MİMARİSİ
+2.1 Genel Bileşenler
+Frontend (Web / Mobile): React, React Native veya Next.js
+
+Backend (API): Node.js (NestJS) veya Python (FastAPI / Django)
+
+Veritabanı: PostgreSQL (primary), Redis (cache), ElasticSearch (log & arama)
+
+WMS Terminal: Android tabanlı el terminalleri (native offline çalışma destekli)
+
+Raporlama: Metabase, Grafana, Power BI API bağlantısı
+
+Queue & Worker: RabbitMQ veya Kafka
+
+Depolama: MinIO (S3 uyumlu), Google Cloud Storage, veya Azure Blob
+
+2.2 Katmanlı Mimari
+UI Katmanı: Tarayıcı ve mobil uygulama
+
+API Katmanı: Kimlik doğrulama, iş mantığı, loglama
+
+Servis Katmanı: FIFO/FEFO, kampanya motoru, fiyat hesaplama
+
+Veri Katmanı: RDBMS + NoSQL + cache
+
+Monitoring Katmanı: Log, metrik, uyarı
+
+2.3 Mikroservis Dağılımı
+Servis	Görev	Teknoloji
+Auth	Kimlik yönetimi, oturum, token	Node.js, Redis
+Product	Ürün, barkod, stok	NestJS, PostgreSQL
+Warehouse	WMS, el terminali, stok hareketi	Python FastAPI
+Logistics	Rota, araç, teslimat	Node.js
+Accounting	Fatura, cari, tahsilat	Django
+B2B	Bayi portalı, sipariş yönetimi	Next.js
+Notification	Mail, SMS, push	Python Celery
+Report	Dashboard ve veri analizi	Metabase, Grafana
+3. SUNUCU VE AĞ YAPISI
+3.1 Sunucu Katmanları
+Katman	Görev	Önerilen Sistem
+Application Server	Backend API servisleri	Ubuntu 22.04 LTS, Nginx Reverse Proxy
+Database Server	PostgreSQL, Redis, Elastic	16GB RAM, NVMe SSD
+File Server	Döküman, görsel, e-fatura arşiv	MinIO veya NAS
+CI/CD Runner	Build, deploy otomasyonu	GitHub Runner / Jenkins
+Backup Node	Günlük yedekleme ve restore testleri	Ayrı fiziksel/VM node
+3.2 Ağ Güvenliği
+Tüm bağlantılar HTTPS (Let’s Encrypt / Cloudflare SSL)
+
+Portlar sadece servis bazlı açık kalır.
+
+VPN ile iç sistem erişimi.
+
+Güvenlik duvarı: UFW / AWS Security Group.
+
+IDS/IPS (Fail2Ban, Wazuh).
+
+Zero Trust yaklaşımı.
+
+4. VERİTABANI MİMARİSİ
+4.1 Tasarım Prensipleri
+Normalize edilmiş (3NF) yapı.
+
+Foreign key + index + trigger kullanımı.
+
+“soft delete” politikası (deleted_at sütunu).
+
+Transaction’lar atomic yapıdadır.
+
+4.2 Örnek Ana Tablolar
+products (stok, barkod, lot, SKU)
+
+warehouses (depo, adres, kapasite)
+
+movements (giriş, çıkış, transfer, iade)
+
+orders (sipariş, durum, fatura ilişkisi)
+
+invoices (e-fatura, e-arşiv, iptal kaydı)
+
+users (rol, şifre, API key, log ilişkisi)
+
+4.3 Indexleme
+Kritik alanlar: sku, lot_no, barcode, created_at
+
+GIN index: JSONB sorgularında
+
+btree index: Sıralama ve range sorguları
+
+5. YEDEKLEME ve FELAKET KURTARMA
+5.1 Yedekleme Politikası
+Tip	Sıklık	Saklama Süresi	Lokasyon
+Full	Haftalık	1 Ay	Offsite + Cloud
+Incremental	Günlük	15 Gün	Local NAS
+Transactional Log	Saatlik	7 Gün	Cloud Archive
+5.2 Geri Yükleme Testi
+Her 15 günde bir “restore test” zorunludur.
+
+Test sonrası sistemin logları incelenir, checksum doğrulaması yapılır.
+
+6. GÜVENLİK POLİTİKALARI
+Tüm şifreler bcrypt + salt ile saklanır.
+
+JWT token süresi: 12 saat.
+
+Oturum yenileme: Refresh token mekanizması.
+
+API rate limit: 100 istek / dakika.
+
+Brute-force saldırı koruması: 5 başarısız giriş → 15 dk kilit.
+
+Rollere göre erişim (RBAC).
+
+Tüm kritik işlemler loglanır (user_id, IP, timestamp).
+
+7. PERFORMANS ve CACHE
+Redis cache: ürün, stok, kullanıcı sorgularında
+
+Asenkron görevler: Celery / BullMQ
+
+CDN entegrasyonu: statik içerik için (Cloudflare / AWS CloudFront)
+
+Gzip + Brotli sıkıştırma
+
+Lazy loading, pagination standartları
+
+8. CI/CD & BAKIM
+8.1 Deploy Akışı
+Kod → Pull Request
+
+Otomatik testler → (Jest, Pytest, E2E)
+
+Build → Docker image
+
+Deploy → Staging
+
+Manual Approve → Production
+
+8.2 Versiyonlama
+Semantic Versioning (vX.Y.Z)
+
+Changelog ve sürüm notları zorunludur.
+
+8.3 İzleme & Loglama
+Log: Elastic + Kibana
+
+Metrik: Prometheus + Grafana
+
+Alarm: Telegram / Slack botları
+
+9. BAKIM & GÜNCELLEME
+Her ay bakım penceresi (02:00–04:00).
+
+Güncelleme sonrası smoke test zorunlu.
+
+Gerektiğinde rollback script hazır tutulur.
+
+Sistem uptime hedefi: %99.9.
+
+✅ Bu dosya ile altyapı kurulumu tamamlanır.
+Bir sonraki dosyada (02_Moduller_ve_Islevler.txt) sistemin tüm modülleri detaylı tanımlanacaktır.
+
+İstersen şimdi hemen 2. dosya (Modüller ve İşlevler) kısmına geçelim mi Mehmet?
+
+(Bunu da direkt kopyalayıp not defterine yapıştır → “ERP_WMS_02_Moduller_ve_Islevler.txt” olarak kaydedebilirsin.)
+
+ERP_WMS_02_Moduller_ve_Islevler.txt
+1. GENEL TANIM
+Bu doküman, ERP + WMS sisteminde yer alan tüm modülleri, işlevlerini, rol bazlı erişim yapılarını ve veri akışlarını kapsar.
+Tüm modüller birbirine bağlıdır; tek oturum (SSO) yapısıyla tüm kullanıcılar rolüne göre yönlendirilir.
+
+2. MODÜL HARİTASI
+Ana Modül	Alt Modüller	Kullanıcı Tipi	Entegrasyon	Loglama	Uyarı
+Ürün Yönetimi	Ürün kartı, barkod, fiyat, lot, SKU, varyant	Admin, Satış, Depo	Google Merchant	Evet	Evet
+Stok Yönetimi	Stok giriş/çıkış, transfer, rezervasyon	Depo, Admin	WMS API	Evet	Evet
+Depo Yönetimi (WMS)	Mal kabul, raflama, toplama, sevkiyat	Depo, Supervisor	El terminali	Evet	Evet
+Muhasebe & Finans	Fatura, cari, banka, tahsilat, gider	Muhasebe, Admin	E-fatura API	Evet	Evet
+Satış & B2B Portal	Sipariş, bayi fiyatı, cari limit, kampanya	Bayi, Satış	ERP API	Evet	Evet
+Tedarikçi & B2B Entegrasyon	Karşılıklı sipariş, stok eşitleme	Tedarikçi, Satın Alma	API, XML	Evet	Evet
+Lojistik & Taşıma	Araç, rota, palet, yükleme, teslimat	Lojistik, Depo	GPS, Harita API	Evet	Evet
+İnsan Kaynakları	Personel, bordro, izin, vardiya	İK, Admin	E-bordro PDF	Evet	Evet
+Kampanya & Fiyat Motoru	Otomatik iskonto, sezon indirimi	Satış, Pazarlama	ERP Core	Evet	Evet
+Raporlama & Analitik	Satış, stok, kâr-zarar, KPI	Yönetim	Power BI / Metabase	Evet	Evet
+3. ÜRÜN YÖNETİMİ
+3.1 İşlevler
+Ürün kartı oluşturma (ana kod, barkod, lot, marka, kategori)
+
+Varyant (renk, beden, ebat) desteği
+
+Satın alma / satış fiyatı ilişkisi
+
+Çoklu birim (adet, koli, palet)
+
+Minimum stok seviyesi alarmı
+
+Ürün hareket geçmişi (FIFO/FEFO)
+
+Görsel yükleme (Max 5 resim)
+
+Otomatik SKU üretimi
+
+3.2 Roller
+Admin: Tüm işlemler
+
+Satış: Fiyat, iskonto, ürün durumu görür
+
+Depo: Sadece stok adedi ve raf yeri görür
+
+4. STOK YÖNETİMİ
+4.1 Stok Hareketleri
+Giriş, çıkış, transfer, iade, fire
+
+Lot bazlı stok takibi
+
+Seri numarası takibi
+
+Stok rezervasyonu (sipariş bekleyen)
+
+FIFO / FEFO kontrol mekanizması
+
+4.2 İş Akışı
+Satın alma → Mal kabul
+
+Depo → Stok raflama
+
+Sipariş → Toplama → Sevkiyat
+
+Fire / İade → Analiz → Rapor
+
+4.3 Uyarı Sistemi
+Minimum stok alarmı (dashboard + e-posta)
+
+Fazla stok uyarısı
+
+Tarihi geçen lot uyarısı
+
+5. DEPO YÖNETİMİ (WMS)
+5.1 El Terminali Fonksiyonları
+Giriş: Mal kabul barkod okuma
+
+Raflama: Uygun raf önerisi (boş/uygun sıcaklık alanı)
+
+Toplama: Siparişe göre rota bazlı toplama listesi
+
+Sayım: Günlük / haftalık stok sayımı
+
+Transfer: Raflar arası hareket
+
+Sevkiyat: Araç bazlı çıkış kaydı
+
+5.2 Depo Yönetimi Ekranı (Web)
+Depo planı (raf, koridor, kapasite)
+
+El terminali senkronizasyonu
+
+Depo personeli görev takibi
+
+Rota planlama ve görev atama
+
+RFID / QR destekli ürün takip
+
+6. MUHASEBE & FİNANS
+6.1 Fatura ve Cari Yönetimi
+Alış / satış faturası (e-fatura / e-arşiv)
+
+Otomatik cari hesap oluşturma
+
+Tahsilat, ödeme, dekont
+
+Bakiye, risk limiti, gecikme faizi
+
+Excel/PDF rapor çıktısı
+
+6.2 Entegrasyonlar
+E-Fatura: GİB API (for invoice sending)
+
+Banka: Enpara / QNB / Garanti API
+
+POS: PayTR, İyzico, Param
+
+7. SATIŞ & B2B PORTAL
+7.1 Bayi Paneli
+Online sipariş oluşturma
+
+Cari limit kontrolü
+
+Güncel fiyat listesi görüntüleme
+
+Kampanya modülü (otomatik indirim)
+
+Sipariş durum takibi (hazırlanıyor, yolda, teslim edildi)
+
+İade talebi açma
+
+7.2 Müşteri İletişimi
+Mesajlaşma paneli (satış temsilcisi ↔ bayi)
+
+Teklif talebi oluşturma
+
+Belgeler sekmesi (irsaliye, fatura, sözleşme)
+
+7.3 Roller
+Bayi: Sadece kendi ürün ve fiyatlarını görür
+
+Satış Ekibi: Tüm bayiler ve siparişlerini yönetir
+
+8. TEDARİKÇİ ENTEGRASYONU
+8.1 Özellikler
+Ortak stok paylaşımı
+
+XML/JSON sipariş alışverişi
+
+Satın alma otomasyonu
+
+Tedarikçi paneli (sipariş durumu, sevkiyat hazırlığı)
+
+API senkronizasyonu (stok, fiyat, teslimat durumu)
+
+8.2 Kullanıcı Tipleri
+Tedarikçi Kullanıcı: Kendi ürünlerini yönetir
+
+Satın Alma Ekibi: Tedarikçi performansını izler
+
+9. LOJİSTİK & TAŞIMA
+9.1 Araç ve Rota Yönetimi
+Araç kayıt (plaka, kapasite, sürücü)
+
+Palet / koli bazlı yükleme planı
+
+Dinamik rota oluşturma (Google Maps API)
+
+Canlı konum takibi (GPS entegrasyonu)
+
+Teslimat onayı (QR imza veya fotoğraf)
+
+Araç bakım ve sigorta takibi
+
+9.2 Lojistik Raporlama
+Teslimat başarı oranı (%)
+
+Ortalama teslim süresi
+
+Yakıt tüketim raporu
+
+Araç başı sevkiyat kapasitesi
+
+10. İNSAN KAYNAKLARI (İK)
+10.1 Fonksiyonlar
+Personel kartı (TC, iletişim, birim, vardiya)
+
+Bordro oluşturma (otomatik maaş hesaplama)
+
+İzin yönetimi (yıllık, hastalık, ücretsiz)
+
+Puantaj ve vardiya çizelgesi
+
+Performans değerlendirme
+
+Eğitim ve sertifika kayıtları
+
+10.2 Roller
+İK Uzmanı: Tüm bordro ve izin işlemleri
+
+Yönetici: Onay / ret yetkisi
+
+Personel: Kendi bordro ve izin talebini görür
+
+11. RAPORLAMA & ANALİTİK
+11.1 Dashboardlar
+Satış hacmi, kâr oranı, stok devir hızı
+
+Depo performans raporu
+
+Tahsilat / gecikme analizi
+
+Personel devamsızlık grafiği
+
+KPI’lar (fatura başına gelir, teslimat süresi, hata oranı)
+
+11.2 Rapor Formatları
+PDF, Excel, Power BI bağlantısı
+
+Otomatik günlük rapor mail gönderimi
+
+Gerçek zamanlı KPI göstergeleri
+
+12. ORTAK ÖZELLİKLER
+Loglama: Tüm işlemler kullanıcı bazlı loglanır
+
+Uyarı Sistemi: Mail, SMS, Dashboard bildirimleri
+
+Dosya Yönetimi: Belgeler otomatik versiyonlanır
+
+API Gateway: Tüm modüller tek noktadan yönetilir
+
+RBAC: Rol bazlı erişim kontrolü (Admin, Depo, Bayi, vs.)
+
+✅ Bu dosya ile modül tanımları tamamlanır.
+Bir sonraki dosya (03_Kullanici_Roller_ve_Erisim_Yapisi.txt) kullanıcı tipleri, izinler ve yönlendirme kurallarını içerir.
+
+
+
+
+1. GENEL TANIM
+Bu doküman, ERP + WMS sistemindeki tüm kullanıcı tiplerini, erişim haklarını, oturum açma akışını, yönlendirme (redirect) kurallarını ve güvenlik protokollerini tanımlar.
+Sistem, tek oturum açma (SSO) mimarisiyle çalışır ve kullanıcı rolüne göre ilgili modüle yönlendirilir.
+
+2. KULLANICI TÜRLERİ
+Kullanıcı Tipi	Görev Alanı	Erişim Modülleri	Platform	Özel Özellikler
+Admin	Tüm sistemin yönetimi	Tüm modüller	Web	Yetki tanımı, log kontrolü
+Depo Elemanı	Stok ve WMS işlemleri	WMS, Stok	El terminali / Mobil	Offline çalışma
+Depo Sorumlusu	Depo yönetimi, personel takibi	WMS, Lojistik, Raporlama	Web	Görev atama, rota planı
+Satış Temsilcisi	Sipariş, bayi ilişkileri	Satış, B2B, Kampanya	Web / Mobil	Teklif, indirim tanımı
+Bayi / Müşteri	B2B portal, sipariş ve cari	B2B, Fatura, Kampanya	Web	Sipariş, cari görüntüleme
+Muhasebe Personeli	Finans ve e-fatura yönetimi	Muhasebe, Finans	Web	E-fatura / E-arşiv
+Satın Alma Uzmanı	Tedarikçi işlemleri	Satın Alma, Tedarikçi Portal	Web	XML/API alışverişi
+Tedarikçi Kullanıcısı	Sipariş yönetimi	Tedarikçi Portal	Web	Ortak stok paylaşımı
+Lojistik Personeli	Araç, rota, teslimat	Lojistik, WMS	Mobil / Web	GPS takibi, teslim onayı
+İK Personeli	Bordro, izin, vardiya	İnsan Kaynakları	Web	Bordro PDF, izin onayı
+Yönetici (C-Level)	Raporlama, KPI, özet analiz	Raporlama, Dashboard	Web / Tablet	Tüm modüllere read-only erişim
+3. GİRİŞ VE YÖNLENDİRME MANTIĞI
+3.1 Tek Giriş Ekranı (SSO)
+Tüm kullanıcılar login.domain.com üzerinden giriş yapar.
+
+Giriş sonrası rolüne göre sistem otomatik yönlendirir:
+
+Rol	Yönlendirme Sayfası
+Admin	/admin/dashboard
+Depo Elemanı	/wms/terminal
+Depo Sorumlusu	/wms/dashboard
+Satış Temsilcisi	/sales/orders
+Bayi	/b2b/home
+Muhasebe	/finance/invoices
+Satın Alma	/purchasing/dashboard
+Tedarikçi	/supplier/home
+Lojistik	/logistics/tracking
+İK	/hr/employees
+Yönetici	/reports/overview
+3.2 Çoklu Rol Yönetimi
+Aynı kullanıcı birden fazla role sahip olabilir (ör. Admin + Muhasebe).
+
+Girişte “rol seçimi” popup’ı ile kullanıcı aktif rolünü seçer.
+
+Rol değişimi anlık yapılabilir, çıkış gerekmez.
+
+4. ERİŞİM SEVİYELERİ (RBAC)
+Erişim Kodu	Tanım	Yetki Alanı	Örnek
+READ	Görüntüleme	Rapor, Liste, Log	Stok listesi
+WRITE	Veri ekleme	Kayıt, Güncelleme	Yeni ürün ekleme
+DELETE	Silme	Yönetici izinli	Kullanıcı silme
+APPROVE	Onaylama	Yönetici / İK	İzin, fatura onayı
+ADMIN	Tüm yetkiler	Sistem geneli	Modül yönetimi
+Her modül için yetkiler tablo üzerinden tanımlanır.
+Örneğin Depo Elemanı yalnızca READ ve WRITE haklarına sahiptir, DELETE ve ADMIN yetkileri yoktur.
+
+5. YETKİ TANIMLARI
+Modül	Admin	Depo	Satış	Bayi	Muhasebe	Lojistik	İK
+Ürün Yönetimi	RWDA	R	RW	R	R	–	–
+Stok Yönetimi	RWDA	RW	R	–	R	R	–
+WMS	RWDA	RW	–	–	–	RW	–
+Muhasebe	RWDA	–	R	R	RWDA	–	–
+Satış	RWDA	–	RWDA	RW	–	–	–
+Lojistik	RWDA	RW	–	–	–	RWDA	–
+İnsan Kaynakları	RWDA	–	–	–	–	–	RWDA
+Raporlama	RWDA	R	R	R	R	R	R
+RWDA = Read, Write, Delete, Admin
+
+6. GÜVENLİK POLİTİKALARI
+6.1 Oturum Yönetimi
+JWT tabanlı kimlik doğrulama
+
+Maksimum oturum süresi: 60 dakika (aktif işlem varsa uzar)
+
+5 hatalı girişte hesap kilitlenir (admin onayı gerekir)
+
+Oturum açma kayıtları (IP, cihaz, zaman) loglanır
+
+6.2 Parola Politikası
+Minimum 8 karakter, büyük/küçük harf, rakam ve özel karakter içermeli
+
+90 günde bir parola yenileme uyarısı
+
+Eski 3 şifre tekrar kullanılamaz
+
+6.3 İki Aşamalı Doğrulama (2FA)
+E-posta veya mobil uygulama (OTP) ile doğrulama
+
+Admin, muhasebe ve finans kullanıcılarında zorunlu
+
+Bayi ve depo kullanıcılarında isteğe bağlı
+
+7. KULLANICI AKTİVİTE LOGU
+Her kullanıcı işlemi (giriş, ekleme, silme, onay) loglanır.
+
+Loglar değiştirilemez (immutable) yapıda saklanır.
+
+Loglar ElasticSearch veya MongoDB üzerinde tutulabilir.
+
+Yönetici panelinde filtreleme yapılabilir:
+
+Tarih
+
+Kullanıcı
+
+IP
+
+Modül
+
+İşlem tipi
+
+8. ERİŞİM DENETİMİ VE DENETİM RAPORLARI
+Otomatik erişim denetimi her 7 günde bir çalışır.
+
+Yetkisi olmayan modül erişimleri raporlanır.
+
+Yönetici panelinde “Erişim Uyarıları” sekmesi bulunur.
+
+Kritik işlemler (ör. veri silme) için ek onay penceresi zorunludur.
+
+9. OFFLINE ERİŞİM VE SENKRONİZASYON
+Depo ve lojistik kullanıcıları native uygulama üzerinden offline çalışabilir.
+
+Offline kayıtlar cihazda şifreli olarak saklanır.
+
+Ağ bağlantısı sağlandığında:
+
+Otomatik olarak ERP sunucusuyla senkronize edilir.
+
+İşlemler sunucuya gönderildikten sonra local bellekten silinir.
+
+Senkronizasyon sırasında çakışan kayıtlar için “öncelik sırası”:
+
+Admin verisi > Sunucu verisi > Local verisi
+
+10. DENETİM VE RAPORLAMA
+Yetki değişiklikleri, oturum açma / kapama, parola reset gibi işlemler denetim tablosuna kaydedilir.
+
+Haftalık “Güvenlik Özeti” raporu yöneticilere e-posta olarak gönderilir.
+
+Rapor içeriği:
+
+Toplam kullanıcı
+
+Başarısız girişler
+
+Yetki değişiklikleri
+
+2FA etkinliği oranı
+
+IP bazlı olağan dışı girişler
+
+✅ Bu doküman tamamlandığında, yazılımcı:
+
+Kullanıcı tablosunu ve rol sistemini oluşturabilir,
+
+Login / yönlendirme akışını kodlayabilir,
+
+Güvenlik protokollerini eksiksiz uygulayabilir.
+
+
+Bu dosya tüm ERP + WMS sisteminin API mimarisini, entegrasyon yapılarını, veri modellerini ve 3. parti bağlantılarını anlatacak.
+Yazılımcı bu dosyayı okuduğunda sistemi dış platformlarla konuşur hale getirebilir.
+
+ERP_WMS_04_API_ve_Entegrasyon.txt
+1. GENEL TANIM
+ERP + WMS sistemi tamamen API-first mimaride tasarlanmıştır.
+Tüm modüller REST tabanlı endpoint’ler üzerinden haberleşir.
+Amaç, modüller arası veri paylaşımını merkezi bir API Gateway üzerinden yönetmek ve tüm dış sistemlerle entegre olabilmektir.
+
+2. API MİMARİSİ
+2.1 Yapı
+Protokol: HTTPS
+
+Format: JSON (varsayılan), XML (opsiyonel)
+
+Kimlik Doğrulama: JWT (JSON Web Token)
+
+Versiyonlama: /api/v1/...
+
+Base URL: https://api.domain.com/v1
+
+2.2 Örnek Endpoint Yapısı
+GET    /api/v1/products
+POST   /api/v1/products
+PUT    /api/v1/products/{id}
+DELETE /api/v1/products/{id}
+2.3 Hata Kodları
+Kod	Açıklama	Örnek
+200	Başarılı	GET başarılı
+201	Kayıt oluşturuldu	POST işlemi
+400	Eksik veya hatalı parametre	Ürün ID eksik
+401	Yetkisiz erişim	Token süresi dolmuş
+404	Kayıt bulunamadı	Yanlış ID
+500	Sunucu hatası	Veritabanı bağlantı hatası
+3. API GÜVENLİĞİ
+SSL Zorunlu: Tüm trafiğin HTTPS üzerinden geçmesi zorunludur.
+
+JWT Doğrulama: Her istek Authorization: Bearer <token> başlığı ile doğrulanır.
+
+IP Kısıtlaması: Dış API erişimi sadece yetkili IP adreslerinden kabul edilir.
+
+Loglama: Tüm API çağrıları tarih, IP ve kullanıcı bilgisiyle loglanır.
+
+Rate Limiting: Maksimum 100 istek / dakika (IP bazlı).
+
+4. MODÜLLERE GÖRE API ENDPOINTLERİ
+4.1 Ürün Yönetimi API
+GET    /api/v1/products
+POST   /api/v1/products
+PUT    /api/v1/products/{id}
+DELETE /api/v1/products/{id}
+GET    /api/v1/products/{id}/stock
+Barkod bazlı sorgu: /api/v1/products/barcode/{code}
+
+Lot / seri bazlı sorgu: /api/v1/products/lot/{lotNo}
+
+Fiyat güncelleme endpoint’i: /api/v1/products/{id}/price
+
+4.2 Stok & Depo (WMS) API
+POST   /api/v1/wms/stockin
+POST   /api/v1/wms/stockout
+GET    /api/v1/wms/locations
+PUT    /api/v1/wms/move/{id}
+GET    /api/v1/wms/inventory
+Offline senkronizasyon endpoint:
+/api/v1/wms/sync/offline
+
+Parametre: device_id, batch_data
+
+Yanıt: status: synced, failed_records
+
+4.3 Satış & B2B API
+GET    /api/v1/b2b/orders
+POST   /api/v1/b2b/orders
+GET    /api/v1/b2b/customers
+POST   /api/v1/b2b/pricelist
+Kampanya motoru: /api/v1/b2b/campaigns
+
+İskonto hesaplama: /api/v1/b2b/discount/calc
+
+4.4 Muhasebe & Finans API
+POST   /api/v1/invoices
+GET    /api/v1/invoices/{id}
+POST   /api/v1/payments
+GET    /api/v1/accounts
+GET    /api/v1/cari/{id}
+Entegrasyon: GİB E-Fatura API, E-Arşiv API
+
+Banka entegrasyonu: /api/v1/finance/banktransactions
+
+4.5 Lojistik & Taşıma API
+POST   /api/v1/logistics/routes
+GET    /api/v1/logistics/vehicles
+PUT    /api/v1/logistics/tracking/{id}
+GPS entegrasyonu: /api/v1/logistics/gps/{vehicleId}
+
+Teslimat onayı: /api/v1/logistics/delivery/confirm
+
+4.6 İnsan Kaynakları (İK) API
+GET    /api/v1/hr/employees
+POST   /api/v1/hr/employees
+PUT    /api/v1/hr/employees/{id}
+GET    /api/v1/hr/payroll/{month}
+E-bordro PDF üretimi: /api/v1/hr/payroll/pdf/{employeeId}
+
+5. ENTEGRASYONLAR
+5.1 E-Fatura / E-Arşiv
+Sağlayıcı: GİB API
+
+Format: UBL 2.1 XML
+
+Veri aktarımı çift yönlü:
+
+ERP → GİB: Fatura gönderimi
+
+GİB → ERP: Durum / yanıt bildirimi
+
+5.2 Banka Entegrasyonu
+Enpara, QNB, Garanti, Ziraat API’leri ile bağlantı
+
+Banka hareketleri otomatik çekilir
+
+Tahsilat ve ödeme eşleşmeleri otomatik yapılır
+
+5.3 Ödeme Entegrasyonları
+PayTR, İyzico, Param ödeme API’leri
+
+3D Secure destekli
+
+Başarılı ödeme sonrası ERP’ye otomatik fatura kaydı
+
+5.4 Kargo & Lojistik Entegrasyonları
+Yurtiçi, MNG, Aras, Hepsijet API’leri
+
+Sipariş bazlı gönderi oluşturma
+
+Takip numarası otomatik ERP’ye aktarılır
+
+5.5 Pazaryeri Entegrasyonları
+Trendyol, Hepsiburada, N11, Çiçeksepeti, Amazon Türkiye
+
+Stok, fiyat ve sipariş senkronizasyonu
+
+Satış sonrası değerlendirme puanları ERP’ye yansır
+
+6. SENKRONİZASYON VE DATA FLOW
+6.1 Veri Akışı
+ERP ↔ API Gateway ↔ Modül ↔ 3. Parti Servis
+
+6.2 Senkronizasyon Modları
+Tip	Açıklama	Kullanım Alanı
+Anlık (Realtime)	Webhook veya event tetikli	Satış, Stok, Fatura
+Periyodik (Scheduled)	Zamanlanmış görev (cron)	Raporlama, Yedekleme
+Manuel (Trigger)	Kullanıcı başlatır	Offline senkronizasyon
+7. WEBHOOKLAR
+Olay	Endpoint	Gönderim
+Yeni Sipariş	/webhook/order_created	Satış sonrası
+Stok Güncelleme	/webhook/stock_update	WMS’ten ERP’ye
+Fatura Onayı	/webhook/invoice_approved	Muhasebe işlemi sonrası
+Teslimat Tamamlandı	/webhook/delivery_done	Lojistik modülünden
+Kullanıcı Girişi	/webhook/login_event	Tüm login’lerde
+8. OFFLINE API MANTIĞI
+Depo / WMS uygulaması internet kesilse bile çalışır.
+
+Yapılan işlemler local SQLite veya IndexedDB üzerinde tutulur.
+
+Ağ bağlantısı kurulduğunda:
+
+/api/v1/wms/sync/offline endpoint’ine toplu veri gönderilir.
+
+Sunucu, işlemleri sırayla işler ve onay döner.
+
+Başarılı kayıtlar local hafızadan otomatik silinir.
+
+9. API DOKÜMANTASYONU VE TEST
+API dokümantasyonu otomatik olarak Swagger UI üzerinden yayınlanır.
+URL: https://api.domain.com/docs
+
+Tüm endpointler Postman Collection olarak dışa aktarılabilir.
+
+Test ortamı: https://sandbox.domain.com/api/v1
+
+Üretim ortamı: https://api.domain.com/v1
+
+10. GELİŞTİRME STANDARTLARI
+Tüm API’ler OpenAPI Specification 3.0 uyumlu.
+
+Değişikliklerde “Breaking Change” bildirimi zorunludur.
+
+Versiyonlama:
+
+/api/v1/ → Production
+
+/api/v2/ → Geliştirme
+
+Kodlama dili: Node.js (NestJS) veya .NET Core önerilir.
+
+Veritabanı: PostgreSQL (primary), Redis (cache).
+
+✅ Bu doküman tamamlandığında yazılımcı:
+
+API Gateway yapısını kurabilir,
+
+ERP modüllerini birbirine entegre edebilir,
+
+parti sistemlerle haberleşmeyi tamamlayabilir.
+
+Bir sonraki dosya:
+📘 ERP_WMS_05_Loglama_Guvenlik_ve_Uyari.txt
+Bu bölümde sistemin log, alarm, izleme, güvenlik katmanları (saldırı önleme, token yönetimi, uyarı bildirimleri, veri yedekleme vb.) anlatılacak.
+
+
+Bu dosya, tüm sistemin güvenlik, loglama, izleme, alarm ve uyarı yönetimi yapısını detaylı olarak anlatır.
+Amaç: sistemin her olayını takip edebilmek, anlık uyarı göndermek ve veri güvenliğini garanti altına almak.
+
+ERP_WMS_05_Loglama_Guvenlik_ve_Uyari.txt
+1. GENEL TANIM
+ERP + WMS sistemi yüksek güvenlik ve tam izlenebilirlik esasına göre inşa edilmiştir.
+Tüm kullanıcı işlemleri, sistem olayları ve veri değişiklikleri detaylı şekilde loglanır.
+Güvenlik, uygulama katmanında ve ağ düzeyinde çift katmanlı olarak sağlanır.
+
+2. GÜVENLİK KATMANLARI
+2.1 Kimlik Doğrulama
+JWT (JSON Web Token) tabanlı oturum sistemi
+
+Token yaşam süresi: 1 saat (otomatik yenileme refresh token ile)
+
+IP + Cihaz kimliği eşleştirme: Aynı token başka cihazdan kullanılamaz.
+
+2FA (iki aşamalı doğrulama) destekli
+
+LDAP entegrasyonu (kurumsal kullanıcılar için)
+
+2.2 Yetkilendirme (Role-Based Access)
+Rol tipleri:
+
+Admin
+
+Depo Sorumlusu
+
+Satış Personeli
+
+Finans / Muhasebe
+
+Tedarikçi
+
+Bayi (B2B)
+
+Misafir / Demo kullanıcı
+
+Her modül, alt menü ve endpoint rol bazlı kontrol edilir.
+
+“Permission Matrix” tablosu PostgreSQL üzerinde tutulur.
+
+3. VERİ GÜVENLİĞİ
+Alan	Yöntem	Açıklama
+Kullanıcı şifreleri	BCrypt (12 tur)	Tek yönlü hash
+Token verileri	AES-256	Sunucu tarafı şifreleme
+Veritabanı bağlantısı	SSL	Zorunlu
+Log dosyaları	SHA256 checksum	Manipülasyon önleme
+Yedekleme dosyaları	GPG ile şifrelenmiş	Otomatik anahtar rotasyonu
+4. LOG SİSTEMİ
+4.1 Loglama Katmanları
+Uygulama Logları:
+
+API istekleri, yanıt süreleri, hata detayları
+
+Framework log düzeyi: INFO, WARN, ERROR, DEBUG
+
+Kullanıcı Logları:
+
+Login, logout, başarısız denemeler
+
+Veri ekleme, silme, güncelleme olayları
+
+IP, cihaz, tarayıcı bilgisi
+
+Veritabanı Logları:
+
+CRUD işlemleri (önce-sonra snapshot)
+
+Trigger’lar aracılığıyla saklanır
+
+Sistem Logları:
+
+CPU, RAM, Disk kullanımı
+
+Sunucu uptime, cron görevleri, servis durumu
+
+4.2 Log Saklama Politikası
+Log Tipi	Saklama Süresi	Arşivleme
+Kullanıcı Logları	2 yıl	Günlük zip arşivi
+API Logları	6 ay	S3 / FTP yedekleme
+Sistem Logları	1 yıl	Şifreli arşiv
+Güvenlik Olay Logları	Süresiz	Ayrı depoda tutulur
+4.3 Log Görüntüleme Paneli
+ERP Admin panelinden erişilebilir: /admin/logs
+
+Filtreleme:
+
+Tarih, Kullanıcı, IP, Modül, İşlem tipi
+
+Log detay ekranı:
+
+Önce-sonra veri farkı (JSON diff)
+
+İşlemi yapan kişi ve cihaz bilgisi
+
+Export: Excel / PDF / JSON
+
+5. GÜVENLİK OLAYLARI VE ALARM SİSTEMİ
+5.1 İzlenen Olaylar
+Olay	Açıklama
+Yetkisiz erişim	3 deneme sonrası hesap kilitlenir
+Şüpheli IP girişi	VPN veya farklı ülke tespiti
+Çoklu login	Aynı kullanıcı farklı cihazlardan
+Fatura manipülasyonu	Fatura tutarı/numarası değişikliği
+Stok farkı	Sayım ile fiili stok farkı
+Offline veri senkron hatası	El terminali gönderim problemi
+5.2 Alarm Tipleri
+Tür	Açıklama	Bildirim Kanalı
+Anlık Alarm	Kritik olaylarda anında uyarı	E-posta, SMS, Telegram
+Zamanlanmış Rapor	Günlük hata ve uyarı raporu	E-posta (saat 23:00)
+Dashboard Uyarısı	Panelde kırmızı bildirim	WebSocket üzerinden canlı
+5.3 Bildirim Altyapısı
+Queue: RabbitMQ
+
+Bildirim Servisi: Node.js Notification Worker
+
+Kanal Desteği:
+
+Mail (SMTP)
+
+SMS (Netgsm, Twilio)
+
+Telegram bot
+
+Web push notification
+
+6. SİSTEM MONİTÖRÜ VE DURUM TAKİBİ
+6.1 İzlenen Servisler
+Servis	Ölçüm	Limit / Uyarı
+API Gateway	Yanıt süresi	> 2sn uyarı
+PostgreSQL	CPU & IOPS	%85 üzeri alarm
+Redis	Hafıza kullanımı	%90 alarm
+WMS Sync Service	Offline batch	5 dk gecikme alarmı
+Mail Queue	Kuyruk boyutu	> 100 işlem = uyarı
+6.2 Monitoring Aracı
+Grafana + Prometheus
+
+Log ingestion: Loki
+
+Uyarı Motoru: Alertmanager
+
+Tüm dashboardlar ERP içinde “Sistem Durumu” menüsünde özetlenir.
+
+7. YEDEKLEME VE FELAKET KURTARMA
+7.1 Otomatik Yedekleme
+Veri Tipi	Frekans	Lokasyon
+Veritabanı	Günlük 03:00	AWS S3 / Google Drive
+Loglar	Haftalık	Şifreli ZIP
+Belgeler (PDF, fatura)	Gerçek zamanlı	CDN yansıtma
+Ayarlar	Her değişiklik sonrası	Config snapshot
+7.2 Geri Yükleme
+“Restore Manager” modülü üzerinden tarih seçilerek geri dönüş yapılabilir.
+
+Yedekler SHA kontrolü ile doğrulanır.
+
+Yedekten dönüş işlemi sadece “Super Admin” yetkisine sahip kullanıcı tarafından yapılabilir.
+
+8. PENETRASYON TESTLERİ VE GÜVENLİK DENETİMİ
+Her sürüm öncesi OWASP ZAP ve Burp Suite testleri yapılır.
+
+SQL Injection, XSS, CSRF, SSRF, IDOR testleri zorunludur.
+
+Kod denetimi: SonarQube + GitHub Actions Security Scan
+
+Zafiyet raporu PDF olarak otomatik ERP’ye yüklenir:
+/admin/security/audit-reports
+
+9. VERİ UYUMU VE KVKK / GDPR
+Kullanıcı verileri sadece izinli amaçlar için saklanır.
+
+“Veri Silme Talebi” API’si ile kullanıcı kendi verisini silebilir.
+
+Hassas loglar (IP, cihaz ID) anonimleştirilir.
+
+Loglama KVKK Madde 12’ye uygun olarak saklanır.
+
+10. GERÇEK ZAMANLI GÜVENLİK ANALİZİ
+Tüm API çağrıları, firewall ve reverse proxy (NGINX + ModSecurity) katmanından geçer.
+
+Şüpheli davranışlar (örnek: aynı IP’den 100 login denemesi) “Threat Watcher” modülüne iletilir.
+
+Sistem kendini koruma moduna geçebilir:
+
+IP kara listeye alınır
+
+Oturumlar sonlandırılır
+
+Admin’e acil uyarı gönderilir
+
+✅ Bu dosya tamamlandığında sistem tam güvenlikli, izlenebilir ve denetlenebilir hale gelir.
+Loglar, alarm sistemi ve güvenlik katmanları sayesinde tüm kullanıcı hareketleri kayıt altındadır.
+
+Bir sonraki dosya:
+📘 ERP_WMS_06_Raporlama_Analitik_ve_Gosterge_Paneli.txt
+Bu dosyada sistemin raporlama, BI (Business Intelligence), dashboard, veri analiz motoru ve yönetim ekranları anlatılacak.
+
+
+Şimdi geliyoruz son bölüme — bu dosya yöneticilerin karar almasını sağlayacak raporlama, BI ve gösterge panelleri kısmını anlatıyor.
+Bu, projenin “gözleri” diyebiliriz: tüm operasyonun durumu, finansal hareketler, depo performansı, müşteri sipariş yoğunluğu, araç konumları, vb. anlık olarak bu sistemde izlenecek.
+
+ERP_WMS_06_Raporlama_Analitik_ve_Gosterge_Paneli.txt
+1. GENEL AMAÇ
+ERP + WMS sisteminin tüm modüllerinden gelen verileri toplayarak, kullanıcı rolüne uygun dinamik raporlar ve görsel paneller sunmaktır.
+Sistem, yöneticilere karar destek, çalışanlara operasyon takibi ve müşterilere şeffaflık sağlar.
+
+2. RAPORLAMA ALTYAPISI
+2.1 Veri Kaynakları
+ERP Modülleri: Ürün, Stok, Sipariş, Muhasebe, İnsan Kaynakları
+
+WMS: Depo hareketleri, toplama, sayım, sevkiyat
+
+TMS: Araç konumları, rota, teslimat zamanı
+
+B2B/B2C: Satış, kampanya, müşteri davranışları
+
+Harici Entegrasyonlar: Kargo, e-fatura, pazaryeri, banka API’leri
+
+2.2 Veri Ambarı (Data Warehouse)
+PostgreSQL → ETL → ClickHouse / BigQuery
+
+ETL süreci: Her gece 02:00'de incremental olarak çalışır.
+
+Boyutsal modelleme (Star Schema):
+
+Fact_Sales, Fact_Stock, Fact_Logistics
+
+Dim_Product, Dim_Customer, Dim_Date, Dim_Warehouse
+
+Veri kalitesi kontrolü: Null, duplicate ve referans bütünlüğü denetimleri otomatik yapılır.
+
+2.3 Rapor Motoru
+Metabase / Superset (açık kaynak BI çözümü)
+
+Rol bazlı dashboard erişimi
+
+SQL & Visual Query Builder desteği
+
+Planlanmış rapor gönderimi (PDF, Excel, Mail)
+
+3. GÖSTERGE PANELİ (DASHBOARD)
+3.1 Yönetici Dashboard (Admin)
+Canlı KPI’lar:
+
+Günlük satış tutarı
+
+Ortalama sipariş değeri
+
+Aktif stok adedi
+
+Geciken sevkiyat sayısı
+
+Güncel tahsilat / borç bakiyesi
+
+Grafikler:
+
+Aylık satış trendi (çizgi grafik)
+
+En çok satan ürünler (bar grafik)
+
+Depo doluluk oranı (% gauge)
+
+Müşteri segmentasyonu (pie chart)
+
+Finansal akış (cash flow)
+
+3.2 Depo Dashboard
+Bekleyen toplama listeleri
+
+Anlık çalışan terminal sayısı
+
+Ortalama toplama süresi
+
+Geciken transferler
+
+FEFO ihlali olan stoklar
+
+Isıl harita (heatmap) — yoğun alan tespiti
+
+3.3 Satış & B2B Dashboard
+Günlük sipariş adedi / onay bekleyen sipariş
+
+Bayi bazlı satış dağılımı
+
+En çok iptal edilen ürünler
+
+Kampanya dönüş oranı (%)
+
+Müşteri lokasyon haritası
+
+3.4 Finans Dashboard
+Günlük fatura / irsaliye sayısı
+
+Tahsilat – Borç farkı
+
+Vade geçmişi
+
+Masraf oranı analizi
+
+Banka entegrasyon durumu
+
+3.5 İnsan Kaynakları Dashboard
+Çalışan devri (Turnover rate)
+
+Fazla mesai grafiği
+
+Bordro özetleri
+
+Departman bazlı verimlilik oranı
+
+İzin kullanımı analizi
+
+4. RAPORLAR
+Rapor Adı	Açıklama	Kullanıcı Tipi
+Stok Durum Raporu	FIFO/FEFO bazlı detay	Depo, Yönetici
+Sipariş Performans Raporu	Günlük, haftalık KPI	Satış, Yönetim
+Araç Bazlı Teslimat Raporu	Zaman, rota, sürücü	Lojistik
+Cari Ekstre	Bakiye, fatura, tahsilat	Muhasebe
+Kampanya Analiz Raporu	ROI, indirim etkisi	Pazarlama
+Çalışan Performans Raporu	İşlem sayısı, süre	İK, Yönetici
+Sistem Olay Raporu	Log & uyarı analizi	Admin
+5. RAPOR ÜRETİMİ VE PAYLAŞIM
+Her rapor PDF / Excel olarak dışa aktarılabilir.
+
+Zamanlanmış raporlar:
+
+Günlük / Haftalık / Aylık
+
+SMTP veya ERP bildirim sistemiyle gönderilir.
+
+API ile dış sistemlere rapor aktarımı mümkündür (örnek: /api/reports/export).
+
+6. ANALİTİK & KEŞİFSEL ANALİZ (BI)
+6.1 Tahminleme (Forecasting)
+Satış tahmini (ARIMA, Prophet modelleri)
+
+Stok tükenme tahmini
+
+Teslimat gecikme riski analizi
+
+Bayi bazlı kampanya başarı tahmini
+
+6.2 Makine Öğrenmesi Destekli Analizler
+Müşteri segmentasyonu (K-Means)
+
+Satış anormallik tespiti
+
+Dolandırıcılık uyarı sistemi
+
+Çalışan verimlilik skorlaması
+
+7. ANLIK ANALİZ VE ALERT
+Dashboard üzerinde canlı veri akışı (WebSocket + Redis)
+
+Kritik KPI eşik değerleri aşıldığında anlık bildirim
+
+“BI Alert Manager” modülü:
+
+Örnek: “Depo doluluk oranı %95 üzerine çıktı”
+
+“Bugün sevkiyatlarda %20 gecikme tespit edildi”
+
+8. HARİTA ENTEGRASYONU
+OpenStreetMap / Google Maps API kullanılır.
+
+Canlı araç takibi (GPS)
+
+Teslimat rotası optimizasyonu
+
+Bölge bazlı satış yoğunluk analizi
+
+9. KULLANICI ARAYÜZÜ VE ERİŞİM
+Dashboard erişimi rol bazlıdır.
+
+Mobil uyumlu responsive yapı.
+
+“Kendi dashboard’unu oluştur” özelliği: kullanıcı kendi widget’larını seçebilir.
+
+Favori raporlar sabitlenebilir.
+
+10. YÖNETİCİ ANALİZ RAPOR SETİ (Örnek)
+Alan	Rapor	Açıklama
+Satış	Günlük KPI	Satış hedefi vs gerçekleşen
+Finans	Tahsilat / Borç dengesi	Gecikme riski analizi
+Depo	Ortalama işlem süresi	Personel başına performans
+Lojistik	Teslimat başarı oranı	Rota optimizasyonu
+İnsan Kaynakları	Verimlilik ve devamsızlık	Departman kıyaslama
+Pazarlama	Kampanya etkinliği	ROI, dönüşüm oranı
+11. GÖRSEL VE TEKNİK ÖZELLİKLER
+Grafik tipleri: Bar, Line, Pie, Heatmap, Scatter, Gauge
+
+Tüm grafikler etkileşimli (filtre, hover, zoom)
+
+Export formatları: PNG, PDF, CSV
+
+Raporlar QR kodlu olarak dış paylaşıma açılabilir.
+
+Dashboard teması: Light / Dark mode destekli
+
+12. GÜVENLİK & YETKİLENDİRME
+Her rapor ve dashboard için erişim kontrolü: RBAC tabanlı
+
+Hassas finansal raporlar yalnızca yönetici onayıyla görüntülenir.
+
+Rapor istekleri loglanır (kim, ne zaman, neyi gördü).
+
+13. YAPAY ZEKA DESTEKLİ RAPORLAMA (Opsiyonel Modül)
+“AI Insight Assistant” modülü:
+
+“Bu ay hangi ürün en çok satıldı?”
+
+“Stok devir hızım nedir?” gibi doğal dil sorgularını destekler.
+
+Cevaplar otomatik olarak rapor haline getirilir.
+
+GPT tabanlı öneri sistemi:
+
+“X ürününde stok düşüyor, yeniden sipariş önerilir.”
+
+✅ Sonuç:
+Bu dosyayla birlikte ERP + WMS sisteminin tüm veri analiz, raporlama ve görselleştirme katmanı tamamlanmıştır.
+Yönetici, müşteri ve çalışanlar için karar destek süreçleri otomatize edilmiştir.
