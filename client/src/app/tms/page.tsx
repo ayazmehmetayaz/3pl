@@ -50,7 +50,7 @@ export default function TMSDashboard() {
   const recentActivities = [
     { id: '1', type: 'delivery', shipment: 'SHP-2024-001', driver: 'Ahmet Yılmaz', location: 'Kadıköy', time: '14:30', status: 'completed' },
     { id: '2', type: 'pickup', shipment: 'PKP-2024-002', driver: 'Mehmet Kaya', location: 'Beşiktaş', time: '14:15', status: 'in_progress' },
-    { id: '3', type: 'maintenance', vehicle: '34 ABC 123', type: 'inspection', time: '13:45', status: 'scheduled' },
+    { id: '3', type: 'maintenance', vehicle: '34 ABC 123', maintenanceType: 'inspection', time: '13:45', status: 'scheduled' },
     { id: '4', type: 'route', route: 'Rota-İstanbul-Ankara', driver: 'Ali Demir', time: '13:30', status: 'completed' }
   ]
 
@@ -271,7 +271,7 @@ export default function TMSDashboard() {
                           <p className="text-sm font-medium text-gray-900">
                             {activity.type === 'delivery' ? `${activity.shipment} - ${activity.driver}` :
                              activity.type === 'pickup' ? `${activity.shipment} - ${activity.driver}` :
-                             activity.type === 'maintenance' ? `${activity.vehicle} - ${activity.type}` :
+                             activity.type === 'maintenance' ? `${activity.vehicle} - ${activity.maintenanceType}` :
                              `${activity.route} - ${activity.driver}`}
                           </p>
                           <p className="text-xs text-gray-600">
