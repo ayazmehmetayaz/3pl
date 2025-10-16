@@ -112,14 +112,14 @@ export default function DashboardPage() {
                 3
               </span>
             </Button>
-            <div className="flex items-center space-x-3">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                <p className="text-xs text-gray-500 capitalize">{user.role}</p>
-              </div>
+                <div className="flex items-center space-x-3">
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-gray-900">{user?.name || 'Kullanıcı'}</p>
+                    <p className="text-xs text-gray-500 capitalize">{user?.role || 'admin'}</p>
+                  </div>
               <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
                 <span className="text-sm font-medium text-gray-700">
-                  {user.name.charAt(0).toUpperCase()}
+                  {user?.name?.charAt(0).toUpperCase() || 'K'}
                 </span>
               </div>
             </div>
@@ -155,7 +155,7 @@ export default function DashboardPage() {
         <main className="flex-1 p-6">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Hoş geldiniz, {user.name}
+              Hoş geldiniz, {user?.name || 'Kullanıcı'}
             </h1>
             <p className="text-gray-600">
               3PL lojistik operasyonlarınızın genel durumunu ve performansını takip edin

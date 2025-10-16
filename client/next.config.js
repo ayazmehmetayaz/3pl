@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
+  // experimental: {
+  //   appDir: true, // Next.js 14'te artık gerekli değil
+  // },
   
   // Vercel optimizations
   compress: true,
