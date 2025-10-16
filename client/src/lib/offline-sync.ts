@@ -146,47 +146,8 @@ class OfflineSyncService {
   }
 
   private getEndpoint(type: string, action: string): string {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || '/api'
-    
-    switch (type) {
-      case 'wms':
-        switch (action) {
-          case 'create': return `${baseUrl}/wms/receiving`
-          case 'update': return `${baseUrl}/wms/inventory`
-          case 'delete': return `${baseUrl}/wms/orders`
-          default: return `${baseUrl}/wms`
-        }
-      case 'tms':
-        switch (action) {
-          case 'create': return `${baseUrl}/tms/shipments`
-          case 'update': return `${baseUrl}/tms/routes`
-          case 'delete': return `${baseUrl}/tms/vehicles`
-          default: return `${baseUrl}/tms`
-        }
-      case 'finance':
-        switch (action) {
-          case 'create': return `${baseUrl}/finance/invoices`
-          case 'update': return `${baseUrl}/finance/payments`
-          case 'delete': return `${baseUrl}/finance/transactions`
-          default: return `${baseUrl}/finance`
-        }
-      case 'hr':
-        switch (action) {
-          case 'create': return `${baseUrl}/hr/employees`
-          case 'update': return `${baseUrl}/hr/leaves`
-          case 'delete': return `${baseUrl}/hr/attendance`
-          default: return `${baseUrl}/hr`
-        }
-      case 'customer':
-        switch (action) {
-          case 'create': return `${baseUrl}/customer/orders`
-          case 'update': return `${baseUrl}/customer/profile`
-          case 'delete': return `${baseUrl}/customer/requests`
-          default: return `${baseUrl}/customer`
-        }
-      default:
-        return `${baseUrl}/sync`
-    }
+    // Vercel'de API route'ları kullanma, sadece mock data
+    return '/api/mock'
   }
 
   private getHttpMethod(action: string): string {

@@ -18,6 +18,16 @@ const nextConfig = {
   // Performance optimizations
   swcMinify: true,
   
+  // API routes configuration
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: '/api/:path*',
+      },
+    ]
+  },
+  
   // Security headers
   async headers() {
     return [
