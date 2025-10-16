@@ -1,5 +1,5 @@
 // User types are now imported from ./user.ts
-export { User, UserRole, Permission } from './user'
+export type { User, UserRole, Permission } from './user'
 
 export interface LoginCredentials {
   email: string
