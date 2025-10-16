@@ -8,7 +8,8 @@
     "dev": "nodemon src/app.js",
     "test": "jest",
     "migrate": "knex migrate:latest",
-    "seed": "knex seed:run"
+    "seed": "knex seed:run",
+    "build": "echo 'Skipping build step...'"
   },
   "dependencies": {
     "express": "^4.18.2",
