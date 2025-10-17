@@ -73,6 +73,11 @@ export default function DashboardPage() {
     { name: 'İnsan Kaynakları', href: '/hr', icon: Users },
     { name: 'Satış & Pazarlama', href: '/sales', icon: TrendingUp },
     { name: 'İdari İşler', href: '/admin', icon: Settings },
+    { name: 'Hukuk', href: '/legal', icon: Settings },
+    { name: 'Eğitim', href: '/education', icon: Users },
+    { name: 'Medya', href: '/media', icon: TrendingUp },
+    { name: 'Teknik Servis', href: '/technical', icon: Settings },
+    { name: 'Güvenlik', href: '/security', icon: Settings },
     { name: 'Raporlama', href: '/reports', icon: TrendingUp },
   ]
 
