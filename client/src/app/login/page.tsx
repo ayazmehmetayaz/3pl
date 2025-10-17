@@ -7,28 +7,30 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
-import { useAuth } from '@/contexts/AuthContext'
 
 export default function LoginPage() {
-  const { login, isLoading } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   })
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setIsLoading(true)
 
-    const result = await login(formData.email, formData.password)
-    
-    if (result.success) {
-      window.location.href = '/dashboard'
-    } else {
-      setError(result.message || 'Giriş yapılamadı')
-    }
+    // Simulate login
+    setTimeout(() => {
+      setIsLoading(false)
+      if (formData.email && formData.password) {
+        window.location.href = '/dashboard'
+      } else {
+        setError('Geçersiz email veya şifre')
+      }
+    }, 1000)
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,9 +47,6 @@ export default function LoginPage() {
         <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute top-1/4 right-0 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-cyan-500/20 rounded-full blur-3xl animate-pulse delay-2000"></div>
-        
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.03\"%3E%3Ccircle cx=\"30\" cy=\"30\" r=\"2\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"></div>
       </div>
 
       <motion.div
@@ -71,11 +70,9 @@ export default function LoginPage() {
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-              className="w-24 h-24 bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 rounded-3xl flex items-center justify-center mx-auto mb-6 relative shadow-xl animate-glow"
+              className="w-24 h-24 bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 rounded-3xl flex items-center justify-center mx-auto mb-6 relative shadow-xl"
             >
               <Package className="h-12 w-12 text-white" />
-              {/* Rotating ring */}
-              <div className="absolute inset-0 rounded-3xl border-2 border-white/30 animate-spin" style={{ animationDuration: '3s' }}></div>
             </motion.div>
             <CardTitle className="text-3xl font-bold text-white mb-2">
               Giriş Yap
@@ -138,19 +135,6 @@ export default function LoginPage() {
                 </motion.div>
               )}
 
-              <div className="flex items-center justify-between">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    className="rounded border-white/30 text-blue-400 focus:ring-blue-400 bg-white/10"
-                  />
-                  <span className="ml-2 text-sm text-white/80">Beni hatırla</span>
-                </label>
-                <Link href="/forgot-password" className="text-sm text-blue-300 hover:text-blue-200 transition-colors">
-                  Şifremi unuttum
-                </Link>
-              </div>
-
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -176,32 +160,29 @@ export default function LoginPage() {
             <div className="mt-8 p-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl border border-white/20 backdrop-blur-sm">
               <h4 className="text-sm font-medium text-white mb-4 flex items-center">
                 <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-                3PL Demo Hesapları
+                Demo Hesapları
               </h4>
               <div className="grid grid-cols-1 gap-3 text-xs">
-                <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" onClick={() => setFormData({email: 'admin@ayaz3pl.com', password: '123456'})}>
+                <div 
+                  className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" 
+                  onClick={() => setFormData({email: 'admin@ayazlojistik.com', password: '123456'})}
+                >
                   <span className="text-white/90 font-medium">Admin</span>
-                  <span className="text-white/60">admin@ayaz3pl.com</span>
+                  <span className="text-white/60">admin@ayazlojistik.com</span>
                 </div>
-                <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" onClick={() => setFormData({email: 'ops@ayaz3pl.com', password: '123456'})}>
+                <div 
+                  className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" 
+                  onClick={() => setFormData({email: 'ops@ayazlojistik.com', password: '123456'})}
+                >
                   <span className="text-white/90 font-medium">Operasyon</span>
-                  <span className="text-white/60">ops@ayaz3pl.com</span>
+                  <span className="text-white/60">ops@ayazlojistik.com</span>
                 </div>
-                <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" onClick={() => setFormData({email: 'warehouse@ayaz3pl.com', password: '123456'})}>
+                <div 
+                  className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" 
+                  onClick={() => setFormData({email: 'warehouse@ayazlojistik.com', password: '123456'})}
+                >
                   <span className="text-white/90 font-medium">Depo</span>
-                  <span className="text-white/60">warehouse@ayaz3pl.com</span>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" onClick={() => setFormData({email: 'transport@ayaz3pl.com', password: '123456'})}>
-                  <span className="text-white/90 font-medium">Nakliye</span>
-                  <span className="text-white/60">transport@ayaz3pl.com</span>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" onClick={() => setFormData({email: 'finance@ayaz3pl.com', password: '123456'})}>
-                  <span className="text-white/90 font-medium">Muhasebe</span>
-                  <span className="text-white/60">finance@ayaz3pl.com</span>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" onClick={() => setFormData({email: 'customer@abc.com', password: '123456'})}>
-                  <span className="text-white/90 font-medium">Müşteri</span>
-                  <span className="text-white/60">customer@abc.com</span>
+                  <span className="text-white/60">warehouse@ayazlojistik.com</span>
                 </div>
               </div>
               <p className="text-xs text-white/60 mt-3 text-center">Hesaplara tıklayarak otomatik doldur</p>

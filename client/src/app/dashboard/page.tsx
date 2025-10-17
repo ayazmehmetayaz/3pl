@@ -71,6 +71,8 @@ export default function DashboardPage() {
     { name: 'Müşteri Portalı', href: '/customer-portal', icon: Users },
     { name: 'Finans & Fatura', href: '/finance', icon: DollarSign },
     { name: 'İnsan Kaynakları', href: '/hr', icon: Users },
+    { name: 'Satış & Pazarlama', href: '/sales', icon: TrendingUp },
+    { name: 'İdari İşler', href: '/admin', icon: Settings },
     { name: 'Raporlama', href: '/reports', icon: TrendingUp },
   ]
 
