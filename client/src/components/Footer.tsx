@@ -49,7 +49,7 @@ export default function Footer() {
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                   <Package className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-xl font-bold">Ayaz ERP</span>
+                <span className="text-xl font-bold">Ayaz 3PL</span>
               </div>
               <p className="text-gray-400 mb-6 max-w-md">
                 Modern ERP ve WMS entegre sistemi ile işletmenizi dijitalleştirin. 
@@ -153,7 +153,7 @@ export default function Footer() {
               transition={{ duration: 0.6 }}
               className="text-gray-400 text-sm mb-4 md:mb-0"
             >
-              © {currentYear} Ayaz ERP. Tüm hakları saklıdır.
+              © {currentYear} Ayaz 3PL. Tüm hakları saklıdır.
             </motion.div>
             
             <motion.div

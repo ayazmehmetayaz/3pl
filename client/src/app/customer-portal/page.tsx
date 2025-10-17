@@ -2,605 +2,279 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  Package, 
-  Truck,
-  Search,
-  Filter,
-  Eye,
-  Download,
-  Camera,
-  TrendingUp,
-  Clock,
-  CheckCircle,
-  AlertTriangle,
-  MapPin,
-  Calendar,
-  DollarSign,
-  BarChart3,
-  User,
-  Bell
-} from 'lucide-react'
+import { Package, Truck, DollarSign, Clock, CheckCircle, AlertCircle, Plus, Search, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import ProtectedRoute from '@/components/ProtectedRoute'
-import { useCustomerAccess } from '@/components/ProtectedRoute'
 
-interface Order {
-  id: string
-  orderNumber: string
-  type: 'fulfillment' | 'storage' | 'transport'
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
-  items: number
-  totalValue: number
-  orderDate: string
-  expectedDate: string
-  actualDate?: string
-  trackingNumber?: string
-  warehouse: string
-}
-
-interface Invoice {
-  id: string
-  invoiceNumber: string
-  amount: number
-  currency: 'TRY' | 'USD' | 'EUR'
-  status: 'draft' | 'sent' | 'paid' | 'overdue'
-  issueDate: string
-  dueDate: string
-  paidDate?: string
-  services: string[]
-}
-
-interface StockItem {
-  id: string
-  sku: string
-  name: string
-  category: string
-  currentStock: number
-  reservedStock: number
-  availableStock: number
-  location: string
-  lastMovement: string
-  value: number
-}
-
-export default function CustomerPortal() {
-  const { canRead, canOrderManagement, canStockView, canCameraAccess, canInvoiceView } = useCustomerAccess()
+export default function CustomerPortalPage() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [activeTab, setActiveTab] = useState('orders')
-
+  
   // Mock data
-  const orders: Order[] = [
+  const orders = [
     {
-      id: '1',
-      orderNumber: 'ORD-2024-001',
-      type: 'fulfillment',
+      id: 'ORD001',
+      date: '2023-11-20',
       status: 'delivered',
-      items: 25,
-      totalValue: 45000,
-      orderDate: '2024-01-10',
-      expectedDate: '2024-01-15',
-      actualDate: '2024-01-14',
-      trackingNumber: 'TRK123456789',
-      warehouse: 'Ana Depo'
+      items: ['Ürün A', 'Ürün B'],
+      total: 1500,
+      trackingNumber: 'TRK123456789'
     },
     {
-      id: '2',
-      orderNumber: 'ORD-2024-002',
-      type: 'storage',
-      status: 'processing',
-      items: 150,
-      totalValue: 28000,
-      orderDate: '2024-01-12',
-      expectedDate: '2024-01-18',
-      warehouse: 'Soğuk Depo'
+      id: 'ORD002', 
+      date: '2023-11-18',
+      status: 'in_transit',
+      items: ['Ürün C'],
+      total: 750,
+      trackingNumber: 'TRK987654321'
     },
     {
-      id: '3',
-      orderNumber: 'ORD-2024-003',
-      type: 'transport',
-      status: 'shipped',
-      items: 8,
-      totalValue: 12000,
-      orderDate: '2024-01-14',
-      expectedDate: '2024-01-16',
-      trackingNumber: 'TRK987654321',
-      warehouse: 'Ana Depo'
+      id: 'ORD003',
+      date: '2023-11-15',
+      status: 'pending',
+      items: ['Ürün D', 'Ürün E', 'Ürün F'],
+      total: 2300,
+      trackingNumber: 'TRK456789123'
     }
   ]
 
-  const invoices: Invoice[] = [
+  const invoices = [
     {
-      id: '1',
-      invoiceNumber: 'FAT-2024-001',
-      amount: 45000,
-      currency: 'TRY',
+      id: 'INV001',
+      date: '2023-11-20',
+      amount: 1500,
       status: 'paid',
-      issueDate: '2024-01-01',
-      dueDate: '2024-01-31',
-      paidDate: '2024-01-25',
-      services: ['Depo Hizmeti', 'Sevkiyat', 'Paketleme']
+      dueDate: '2023-12-20'
     },
     {
-      id: '2',
-      invoiceNumber: 'FAT-2024-002',
-      amount: 32000,
-      currency: 'TRY',
-      status: 'sent',
-      issueDate: '2024-01-05',
-      dueDate: '2024-02-05',
-      services: ['Nakliye', 'Gümrük']
+      id: 'INV002',
+      date: '2023-11-18', 
+      amount: 750,
+      status: 'pending',
+      dueDate: '2023-12-18'
     }
   ]
 
-  const stockItems: StockItem[] = [
-    {
-      id: '1',
-      sku: 'ABC-001',
-      name: 'Laptop Bilgisayar',
-      category: 'Elektronik',
-      currentStock: 45,
-      reservedStock: 5,
-      availableStock: 40,
-      location: 'A-01-01-01',
-      lastMovement: '2024-01-15',
-      value: 250000
-    },
-    {
-      id: '2',
-      sku: 'XYZ-002',
-      name: 'Gıda Ürünü',
-      category: 'Gıda',
-      currentStock: 8,
-      reservedStock: 2,
-      availableStock: 6,
-      location: 'B-02-03-02',
-      lastMovement: '2024-01-16',
-      value: 1500
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'delivered': return <CheckCircle className="h-4 w-4 text-green-500" />
+      case 'in_transit': return <Truck className="h-4 w-4 text-blue-500" />
+      case 'pending': return <Clock className="h-4 w-4 text-yellow-500" />
+      default: return <AlertCircle className="h-4 w-4 text-gray-500" />
     }
-  ]
+  }
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'delivered': return 'Teslim Edildi'
+      case 'in_transit': return 'Yolda'
+      case 'pending': return 'Hazırlanıyor'
+      default: return 'Bilinmiyor'
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'delivered':
-        return 'bg-green-100 text-green-800'
-      case 'shipped':
-        return 'bg-blue-100 text-blue-800'
-      case 'processing':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'pending':
-        return 'bg-gray-100 text-gray-800'
-      case 'cancelled':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
+      case 'delivered': return 'text-green-700 bg-green-100'
+      case 'in_transit': return 'text-blue-700 bg-blue-100'
+      case 'pending': return 'text-yellow-700 bg-yellow-100'
+      default: return 'text-gray-700 bg-gray-100'
     }
-  }
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'fulfillment':
-        return <Package className="h-4 w-4 text-blue-500" />
-      case 'storage':
-        return <Package className="h-4 w-4 text-green-500" />
-      case 'transport':
-        return <Truck className="h-4 w-4 text-orange-500" />
-      default:
-        return <Package className="h-4 w-4 text-gray-500" />
-    }
-  }
-
-  const getInvoiceStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return 'bg-green-100 text-green-800'
-      case 'sent':
-        return 'bg-blue-100 text-blue-800'
-      case 'overdue':
-        return 'bg-red-100 text-red-800'
-      case 'draft':
-        return 'bg-gray-100 text-gray-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getStockStatus = (item: StockItem) => {
-    if (item.availableStock === 0) return { status: 'out_of_stock', color: 'bg-red-100 text-red-800' }
-    if (item.availableStock <= 10) return { status: 'low_stock', color: 'bg-yellow-100 text-yellow-800' }
-    return { status: 'available', color: 'bg-green-100 text-green-800' }
-  }
-
-  if (!canRead) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Yetkisiz Erişim</h2>
-          <p className="text-gray-600">Müşteri portalına erişim izniniz bulunmuyor.</p>
-        </div>
-      </div>
-    )
   }
 
   return (
-    <ProtectedRoute requiredPermission="customer:read">
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <div className="bg-white shadow-sm border-b mb-6">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Müşteri Portalı</h1>
-                <p className="text-gray-600">Siparişlerim, stok durumu, faturalarım ve kamera görüntüleri</p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Sipariş, fatura, ürün ara..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 w-64"
-                  />
-                </div>
-                {canCameraAccess && (
-                  <Button variant="outline">
-                    <Camera className="h-4 w-4 mr-2" />
-                    Kamera Görüntüleri
-                  </Button>
-                )}
-                <Button variant="outline">
-                  <Bell className="h-4 w-4 mr-2" />
-                  Bildirimler
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="px-6">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            {[
-              {
-                title: 'Toplam Sipariş',
-                value: orders.length,
-                icon: Package,
-                color: 'bg-blue-500'
-              },
-              {
-                title: 'Aktif Sipariş',
-                value: orders.filter(o => o.status === 'processing' || o.status === 'shipped').length,
-                icon: Clock,
-                color: 'bg-yellow-500'
-              },
-              {
-                title: 'Toplam Stok Değeri',
-                value: `₺${stockItems.reduce((sum, s) => sum + s.value, 0).toLocaleString()}`,
-                icon: DollarSign,
-                color: 'bg-green-500'
-              },
-              {
-                title: 'Bekleyen Fatura',
-                value: invoices.filter(i => i.status === 'sent').length,
-                icon: AlertTriangle,
-                color: 'bg-orange-500'
-              }
-            ].map((stat, index) => (
-              <motion.div
-                key={stat.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <Card className="card-hover">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600 mb-1">
-                          {stat.title}
-                        </p>
-                        <p className="text-2xl font-bold text-gray-900">
-                          {stat.value}
-                        </p>
-                      </div>
-                      <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center`}>
-                        <stat.icon className="h-6 w-6 text-white" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+    <ProtectedRoute allowedRoles={['customer']}>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="max-w-7xl mx-auto"
+        >
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Müşteri Portalı
+            </h1>
+            <p className="text-gray-600">
+              Siparişlerinizi takip edin, faturalarınızı görüntüleyin
+            </p>
           </div>
 
-          {/* Tabs */}
-          <div className="mb-6">
-            <div className="border-b border-gray-200">
-              <nav className="-mb-px flex space-x-8">
-                {[
-                  { id: 'orders', name: 'Siparişlerim', icon: Package, canAccess: canOrderManagement },
-                  { id: 'stock', name: 'Stok Durumu', icon: BarChart3, canAccess: canStockView },
-                  { id: 'invoices', name: 'Faturalarım', icon: DollarSign, canAccess: canInvoiceView }
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => tab.canAccess && setActiveTab(tab.id)}
-                    disabled={!tab.canAccess}
-                    className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
-                      activeTab === tab.id
-                        ? 'border-blue-500 text-blue-600'
-                        : tab.canAccess
-                        ? 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        : 'border-transparent text-gray-300 cursor-not-allowed'
-                    }`}
-                  >
-                    <tab.icon className="h-4 w-4" />
-                    <span>{tab.name}</span>
-                  </button>
-                ))}
-              </nav>
-            </div>
-          </div>
-
-          {/* Tab Content */}
-          {activeTab === 'orders' && canOrderManagement && (
+          {/* Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Toplam Sipariş</CardTitle>
+                  <Package className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{orders.length}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Bu ay
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+            >
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Bekleyen Fatura</CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    ₺{invoices.filter(inv => inv.status === 'pending').reduce((sum, inv) => sum + inv.amount, 0)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Ödenmemiş
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: 0.3 }}
+            >
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Devam Eden</CardTitle>
+                  <Truck className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {orders.filter(order => order.status === 'in_transit' || order.status === 'pending').length}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Sipariş
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Orders */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
             >
               <Card>
                 <CardHeader>
-                  <CardTitle>Siparişlerim</CardTitle>
-                  <CardDescription>
-                    3PL hizmet siparişleri ve takip bilgileri
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Siparişlerim</CardTitle>
+                    <Button size="sm">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Yeni Sipariş
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        placeholder="Sipariş ara..."
+                        className="pl-10"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Filter className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {orders.map((order, index) => (
-                      <motion.div
-                        key={order.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: index * 0.1 }}
-                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            {getTypeIcon(order.type)}
-                            <div>
-                              <h3 className="font-semibold text-gray-900">
-                                {order.orderNumber}
-                              </h3>
-                              <p className="text-sm text-gray-600">
-                                {order.type === 'fulfillment' ? 'Fulfillment' :
-                                 order.type === 'storage' ? 'Depo Hizmeti' : 'Nakliye'} • {order.items} ürün
-                              </p>
-                              <div className="flex items-center space-x-4 mt-1">
-                                <div className="flex items-center space-x-1">
-                                  <MapPin className="h-3 w-3 text-gray-400" />
-                                  <span className="text-xs text-gray-600">{order.warehouse}</span>
-                                </div>
-                                <div className="flex items-center space-x-1">
-                                  <Calendar className="h-3 w-3 text-gray-400" />
-                                  <span className="text-xs text-gray-600">Sipariş: {order.orderDate}</span>
-                                </div>
-                                {order.trackingNumber && (
-                                  <span className="text-xs text-blue-600">
-                                    Takip: {order.trackingNumber}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center space-x-6">
-                            <div className="text-center">
-                              <p className="text-sm text-gray-600">Tutar</p>
-                              <p className="font-bold text-gray-900">₺{order.totalValue.toLocaleString()}</p>
-                            </div>
-                            
-                            <div className="text-center">
-                              <p className="text-sm text-gray-600">Beklenen</p>
-                              <p className="text-sm font-medium">{order.expectedDate}</p>
-                            </div>
-                            
-                            <div className="text-center">
-                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                                {order.status === 'delivered' ? 'Teslim Edildi' :
-                                 order.status === 'shipped' ? 'Kargoya Verildi' :
-                                 order.status === 'processing' ? 'İşleniyor' :
-                                 order.status === 'pending' ? 'Bekliyor' : 'İptal'}
+                    {orders
+                      .filter(order => 
+                        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        order.items.some(item => item.toLowerCase().includes(searchTerm.toLowerCase()))
+                      )
+                      .map((order) => (
+                        <div key={order.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{order.id}</span>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                                {getStatusIcon(order.status)}
+                                <span className="ml-1">{getStatusText(order.status)}</span>
                               </span>
-                              {order.actualDate && (
-                                <p className="text-xs text-green-600 mt-1">
-                                  Teslim: {order.actualDate}
-                                </p>
-                              )}
                             </div>
-                            
-                            <div className="flex items-center space-x-2">
-                              <Button variant="outline" size="sm">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              {order.trackingNumber && (
-                                <Button variant="outline" size="sm">
-                                  <Truck className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
+                            <span className="text-sm text-gray-500">{order.date}</span>
+                          </div>
+                          <div className="text-sm text-gray-600 mb-2">
+                            <div>Ürünler: {order.items.join(', ')}</div>
+                            <div>Takip No: {order.trackingNumber}</div>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">₺{order.total}</span>
+                            <Button variant="outline" size="sm">
+                              Detay
+                            </Button>
                           </div>
                         </div>
-                      </motion.div>
-                    ))}
+                      ))}
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
-          )}
 
-          {activeTab === 'stock' && canStockView && (
+            {/* Invoices */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle>Stok Durumu</CardTitle>
-                  <CardDescription>
-                    Gerçek zamanlı stok bilgileri ve konum takibi
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {stockItems.map((item, index) => {
-                      const stockStatus = getStockStatus(item)
-                      return (
-                        <motion.div
-                          key={item.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.6, delay: index * 0.1 }}
-                          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="font-semibold text-gray-900">
-                                {item.sku} - {item.name}
-                              </h3>
-                              <p className="text-sm text-gray-600">
-                                {item.category} • Konum: {item.location}
-                              </p>
-                              <div className="flex items-center space-x-4 mt-1">
-                                <span className="text-xs text-gray-600">
-                                  Son hareket: {item.lastMovement}
-                                </span>
-                                <span className="text-xs text-gray-600">
-                                  Değer: ₺{item.value.toLocaleString()}
-                                </span>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center space-x-6">
-                              <div className="text-center">
-                                <p className="text-sm text-gray-600">Mevcut</p>
-                                <p className="font-bold text-gray-900">{item.currentStock}</p>
-                              </div>
-                              
-                              <div className="text-center">
-                                <p className="text-sm text-gray-600">Rezerve</p>
-                                <p className="font-medium text-orange-600">{item.reservedStock}</p>
-                              </div>
-                              
-                              <div className="text-center">
-                                <p className="text-sm text-gray-600">Kullanılabilir</p>
-                                <p className="font-medium text-green-600">{item.availableStock}</p>
-                              </div>
-                              
-                              <div className="text-center">
-                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${stockStatus.color}`}>
-                                  {stockStatus.status === 'available' ? 'Mevcut' :
-                                   stockStatus.status === 'low_stock' ? 'Düşük Stok' : 'Stokta Yok'}
-                                </span>
-                              </div>
-                              
-                              <Button variant="outline" size="sm">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-
-          {activeTab === 'invoices' && canInvoiceView && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
             >
               <Card>
                 <CardHeader>
                   <CardTitle>Faturalarım</CardTitle>
-                  <CardDescription>
-                    3PL hizmet faturaları ve ödeme durumları
-                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {invoices.map((invoice, index) => (
-                      <motion.div
-                        key={invoice.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: index * 0.1 }}
-                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h3 className="font-semibold text-gray-900">
-                              {invoice.invoiceNumber}
-                            </h3>
-                            <p className="text-sm text-gray-600">
-                              Hizmetler: {invoice.services.join(', ')}
-                            </p>
-                            <div className="flex items-center space-x-4 mt-1">
-                              <span className="text-xs text-gray-600">
-                                Düzenleme: {invoice.issueDate}
-                              </span>
-                              <span className="text-xs text-gray-600">
-                                Vade: {invoice.dueDate}
-                              </span>
-                              {invoice.paidDate && (
-                                <span className="text-xs text-green-600">
-                                  Ödeme: {invoice.paidDate}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center space-x-6">
-                            <div className="text-center">
-                              <p className="text-sm text-gray-600">Tutar</p>
-                              <p className="font-bold text-gray-900">₺{invoice.amount.toLocaleString()}</p>
-                            </div>
-                            
-                            <div className="text-center">
-                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getInvoiceStatusColor(invoice.status)}`}>
-                                {invoice.status === 'paid' ? 'Ödendi' :
-                                 invoice.status === 'sent' ? 'Gönderildi' :
-                                 invoice.status === 'overdue' ? 'Vadesi Geçti' : 'Taslak'}
-                              </span>
-                            </div>
-                            
-                            <div className="flex items-center space-x-2">
-                              <Button variant="outline" size="sm">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <Download className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
+                    {invoices.map((invoice) => (
+                      <div key={invoice.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium">{invoice.id}</span>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            invoice.status === 'paid' 
+                              ? 'text-green-700 bg-green-100' 
+                              : 'text-yellow-700 bg-yellow-100'
+                          }`}>
+                            {invoice.status === 'paid' ? 'Ödendi' : 'Beklemede'}
+                          </span>
                         </div>
-                      </motion.div>
+                        <div className="text-sm text-gray-600 mb-2">
+                          <div>Tarih: {invoice.date}</div>
+                          <div>Vade: {invoice.dueDate}</div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">₺{invoice.amount}</span>
+                          <Button variant="outline" size="sm">
+                            İndir
+                          </Button>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
-          )}
-        </div>
+          </div>
+        </motion.div>
       </div>
     </ProtectedRoute>
   )

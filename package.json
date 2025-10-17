@@ -31,9 +31,5 @@
   "license": "PROPRIETARY",
   "devDependencies": {
     "concurrently": "^8.2.2"
-  },
-  "workspaces": [
-    "server",
-    "client"
-  ]
+  }
 }

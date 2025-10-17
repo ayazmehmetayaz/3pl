@@ -20,6 +20,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/contexts/AuthContext'
 import ProtectedRoute from '@/components/ProtectedRoute'
+import LoadingSpinner from '@/components/LoadingSpinner'
+import ThemeToggle from '@/components/ThemeToggle'
+import NotificationCenter from '@/components/NotificationCenter'
 
 export default function DashboardPage() {
   const { user, logout, isLoading } = useAuth()
@@ -72,29 +75,51 @@ export default function DashboardPage() {
   ]
 
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen">Yükleniyor...</div>
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <LoadingSpinner 
+          variant="gradient" 
+          size="large" 
+          tip="Dashboard yükleniyor..." 
+        />
+      </div>
+    )
   }
 
   return (
     <ProtectedRoute>
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Animated Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-1/4 right-0 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl animate-pulse delay-2000"></div>
+      </div>
+
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="flex items-center justify-between px-4 py-4">
+      <header className="relative z-10 bg-white/80 backdrop-blur-md shadow-xl border-b border-white/20">
+        <div className="flex items-center justify-between px-6 py-6">
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden"
+              className="md:hidden hover:bg-white/50"
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Package className="h-5 w-5 text-white" />
+            <div className="flex items-center space-x-3">
+              <motion.div 
+                className="w-12 h-12 bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg"
+                whileHover={{ rotate: 5, scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <Package className="h-6 w-6 text-white" />
+              </motion.div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">Ayaz 3PL</h1>
+                <p className="text-sm text-gray-500 font-medium">Lojistik Yönetim Sistemi</p>
               </div>
-              <span className="text-xl font-bold text-gray-900">Ayaz 3PL</span>
             </div>
           </div>
 
@@ -106,12 +131,8 @@ export default function DashboardPage() {
                 className="pl-10 w-64"
               />
             </div>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                3
-              </span>
-            </Button>
+            <ThemeToggle />
+            <NotificationCenter />
                 <div className="flex items-center space-x-3">
                   <div className="text-right">
                     <p className="text-sm font-medium text-gray-900">{user?.name || 'Kullanıcı'}</p>
@@ -167,28 +188,44 @@ export default function DashboardPage() {
             {stats.map((stat, index) => (
               <motion.div
                 key={stat.title}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
+                whileHover={{ scale: 1.05, y: -5 }}
+                className="group"
               >
-                <Card className="card-hover">
-                  <CardContent className="p-6">
+                <Card className="card-hover glass bg-gradient-to-br from-white/95 to-white/80 backdrop-blur-md shadow-xl hover:shadow-2xl border-0 relative overflow-hidden">
+                  {/* Shimmer Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer"></div>
+                  
+                  <CardContent className="p-6 relative z-10">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600 mb-1">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-600 mb-2 group-hover:text-gray-800 transition-colors">
                           {stat.title}
                         </p>
-                        <p className="text-2xl font-bold text-gray-900">
+                        <p className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-2">
                           {stat.value}
                         </p>
-                        <p className="text-sm text-green-600 mt-1">
-                          {stat.change} geçen aya göre
-                        </p>
+                        <div className="flex items-center">
+                          <span className="text-sm text-green-600 font-bold bg-green-100 px-3 py-1 rounded-full">
+                            {stat.change} geçen aya göre
+                          </span>
+                        </div>
                       </div>
-                      <div className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center`}>
-                        <stat.icon className="h-6 w-6 text-white" />
-                      </div>
+                      <motion.div 
+                        className={`w-16 h-16 ${stat.color} rounded-2xl flex items-center justify-center shadow-lg relative`}
+                        whileHover={{ rotate: 10, scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+                        <stat.icon className="h-8 w-8 text-white" />
+                        {/* Glow Effect */}
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      </motion.div>
                     </div>
+                    
+                    {/* Bottom Gradient */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </CardContent>
                 </Card>
               </motion.div>

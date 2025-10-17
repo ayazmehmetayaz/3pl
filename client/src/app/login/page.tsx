@@ -39,41 +39,56 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-1/4 right-0 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-cyan-500/20 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.03\"%3E%3Ccircle cx=\"30\" cy=\"30\" r=\"2\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"></div>
+      </div>
+
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="w-full max-w-md"
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="w-full max-w-md relative z-10"
       >
         {/* Back to Home */}
         <div className="mb-6">
-          <Link href="/" className="inline-flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+          <Link href="/" className="inline-flex items-center text-white/80 hover:text-white transition-colors">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Anasayfaya Dön
           </Link>
         </div>
 
         {/* Login Card */}
-        <Card className="shadow-xl border-0">
-          <CardHeader className="text-center pb-6">
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center">
-                <Package className="h-8 w-8 text-white" />
-              </div>
-            </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">
+        <Card className="shadow-2xl border-0 glass bg-white/10 backdrop-blur-md">
+          <CardHeader className="text-center pb-8">
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              className="w-24 h-24 bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 rounded-3xl flex items-center justify-center mx-auto mb-6 relative shadow-xl animate-glow"
+            >
+              <Package className="h-12 w-12 text-white" />
+              {/* Rotating ring */}
+              <div className="absolute inset-0 rounded-3xl border-2 border-white/30 animate-spin" style={{ animationDuration: '3s' }}></div>
+            </motion.div>
+            <CardTitle className="text-3xl font-bold text-white mb-2">
               Giriş Yap
             </CardTitle>
-            <CardDescription className="text-gray-600">
+            <CardDescription className="text-white/80 text-lg">
               Hesabınıza giriş yaparak sisteme erişim sağlayın
             </CardDescription>
           </CardHeader>
           
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-white/90 mb-3">
                   E-posta Adresi
                 </label>
                 <Input
@@ -84,12 +99,12 @@ export default function LoginPage() {
                   onChange={handleInputChange}
                   placeholder="ornek@email.com"
                   required
-                  className="w-full"
+                  className="w-full bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 focus:ring-white/20 backdrop-blur-sm"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-white/90 mb-3">
                   Şifre
                 </label>
                 <div className="relative">
@@ -101,14 +116,14 @@ export default function LoginPage() {
                     onChange={handleInputChange}
                     placeholder="••••••••"
                     required
-                    className="w-full pr-10"
+                    className="w-full pr-12 bg-white/10 border-white/20 text-white placeholder:text-white/60 focus:border-white/40 focus:ring-white/20 backdrop-blur-sm"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
               </div>
@@ -117,9 +132,9 @@ export default function LoginPage() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="p-3 bg-red-50 border border-red-200 rounded-md"
+                  className="text-red-300 text-sm bg-red-500/20 p-4 rounded-xl border border-red-500/30 backdrop-blur-sm"
                 >
-                  <p className="text-sm text-red-600">{error}</p>
+                  {error}
                 </motion.div>
               )}
 
@@ -127,35 +142,69 @@ export default function LoginPage() {
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-white/30 text-blue-400 focus:ring-blue-400 bg-white/10"
                   />
-                  <span className="ml-2 text-sm text-gray-600">Beni hatırla</span>
+                  <span className="ml-2 text-sm text-white/80">Beni hatırla</span>
                 </label>
-                <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
+                <Link href="/forgot-password" className="text-sm text-blue-300 hover:text-blue-200 transition-colors">
                   Şifremi unuttum
                 </Link>
               </div>
 
-              <Button
-                type="submit"
-                className="w-full btn-animate"
-                disabled={isLoading}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                {isLoading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
-              </Button>
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 text-lg shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 rounded-xl border-0"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                      Giriş yapılıyor...
+                    </div>
+                  ) : (
+                    'Giriş Yap'
+                  )}
+                </Button>
+              </motion.div>
             </form>
 
             {/* Demo Credentials */}
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <h4 className="text-sm font-medium text-blue-900 mb-2">3PL Demo Hesapları:</h4>
-              <div className="text-xs text-blue-700 space-y-1">
-                <div><strong>Admin:</strong> admin@ayaz3pl.com / 123456</div>
-                <div><strong>Operasyon:</strong> ops@ayaz3pl.com / 123456</div>
-                <div><strong>Depo:</strong> warehouse@ayaz3pl.com / 123456</div>
-                <div><strong>Nakliye:</strong> transport@ayaz3pl.com / 123456</div>
-                <div><strong>Muhasebe:</strong> finance@ayaz3pl.com / 123456</div>
-                <div><strong>Müşteri:</strong> customer@abc.com / 123456</div>
+            <div className="mt-8 p-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl border border-white/20 backdrop-blur-sm">
+              <h4 className="text-sm font-medium text-white mb-4 flex items-center">
+                <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                3PL Demo Hesapları
+              </h4>
+              <div className="grid grid-cols-1 gap-3 text-xs">
+                <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" onClick={() => setFormData({email: 'admin@ayaz3pl.com', password: '123456'})}>
+                  <span className="text-white/90 font-medium">Admin</span>
+                  <span className="text-white/60">admin@ayaz3pl.com</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" onClick={() => setFormData({email: 'ops@ayaz3pl.com', password: '123456'})}>
+                  <span className="text-white/90 font-medium">Operasyon</span>
+                  <span className="text-white/60">ops@ayaz3pl.com</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" onClick={() => setFormData({email: 'warehouse@ayaz3pl.com', password: '123456'})}>
+                  <span className="text-white/90 font-medium">Depo</span>
+                  <span className="text-white/60">warehouse@ayaz3pl.com</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" onClick={() => setFormData({email: 'transport@ayaz3pl.com', password: '123456'})}>
+                  <span className="text-white/90 font-medium">Nakliye</span>
+                  <span className="text-white/60">transport@ayaz3pl.com</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" onClick={() => setFormData({email: 'finance@ayaz3pl.com', password: '123456'})}>
+                  <span className="text-white/90 font-medium">Muhasebe</span>
+                  <span className="text-white/60">finance@ayaz3pl.com</span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" onClick={() => setFormData({email: 'customer@abc.com', password: '123456'})}>
+                  <span className="text-white/90 font-medium">Müşteri</span>
+                  <span className="text-white/60">customer@abc.com</span>
+                </div>
               </div>
+              <p className="text-xs text-white/60 mt-3 text-center">Hesaplara tıklayarak otomatik doldur</p>
             </div>
           </CardContent>
         </Card>

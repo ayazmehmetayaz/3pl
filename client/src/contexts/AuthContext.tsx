@@ -100,16 +100,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isAuthenticated = !!user
 
   useEffect(() => {
-    // Sayfa yüklendiğinde localStorage'dan kullanıcı bilgilerini al
-    const savedUser = localStorage.getItem('user')
-    if (savedUser) {
-      try {
-        const userData = JSON.parse(savedUser)
-        setUser(userData)
-        setPermissions(userData.permissions || [])
-      } catch (error) {
-        console.error('Error parsing saved user data:', error)
-        localStorage.removeItem('user')
+    // Client-side only operations
+    if (typeof window !== 'undefined') {
+      // Sayfa yüklendiğinde localStorage'dan kullanıcı bilgilerini al
+      const savedUser = localStorage.getItem('user')
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser)
+          setUser(userData)
+          setPermissions(userData.permissions || [])
+        } catch (error) {
+          console.error('Error parsing saved user data:', error)
+          localStorage.removeItem('user')
+        }
       }
     }
     setIsLoading(false)
@@ -146,7 +149,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       // LocalStorage'a kaydet
-      localStorage.setItem('user', JSON.stringify(userWithLogin))
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user', JSON.stringify(userWithLogin))
+      }
       
       setUser(userWithLogin)
       setPermissions(userWithLogin.permissions)
@@ -161,7 +166,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const logout = () => {
-    localStorage.removeItem('user')
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('user')
+    }
     setUser(null)
     setPermissions([])
   }
@@ -182,7 +189,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (!user) return
     
     const updatedUser = { ...user, ...userData, updatedAt: new Date() }
-    localStorage.setItem('user', JSON.stringify(updatedUser))
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user', JSON.stringify(updatedUser))
+    }
     setUser(updatedUser)
   }
 
