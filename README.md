@@ -64,4 +64,4 @@ API dokümantasyonu `/docs/api` klasöründe bulunmaktadır.
 - KVKK uyumluluğu
 
 ## Lisans
-Özel yazılım - Ayaz Lojistik A.Ş.
+Özel yazılım - Ayaz Lojistik A.Ş.# 3pl
