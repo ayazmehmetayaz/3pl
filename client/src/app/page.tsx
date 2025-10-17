@@ -104,11 +104,11 @@ export default function HomePage() {
             </motion.div>
 
             <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
-              Ayaz 3PL ERP
-        </h1>
+              Ayaz Lojistik
+            </h1>
             <p className="text-2xl text-white/80 mb-8">
-          Lojistik Entegre Yönetim Sistemi
-        </p>
+              Lojistik Entegre Yönetim Sistemi
+            </p>
             <p className="text-lg text-white/60 mb-12 max-w-3xl mx-auto">
               Depo, taşıma, finans, insan kaynakları ve raporlama modüllerini tek platformda yönetin.
               Modern, hızlı ve güvenli ERP çözümü.
