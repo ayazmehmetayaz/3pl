@@ -336,10 +336,12 @@ const resetPassword = async (req, res) => {
 };
 
 module.exports = {
-  login,
-  register,
-  logout,
-  refreshToken,
-  forgotPassword,
-  resetPassword
+  authController: {
+    login,
+    register,
+    logout,
+    refreshToken,
+    forgotPassword,
+    resetPassword
+  }
 };
