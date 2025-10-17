@@ -109,10 +109,31 @@ export default function HomePage() {
             <p className="text-2xl text-white/80 mb-8">
               Lojistik Entegre Yönetim Sistemi
             </p>
-            <p className="text-lg text-white/60 mb-12 max-w-3xl mx-auto">
-              Depo, taşıma, finans, insan kaynakları ve raporlama modüllerini tek platformda yönetin.
-              Modern, hızlı ve güvenli ERP çözümü.
-            </p>
+                   <p className="text-lg text-white/60 mb-8 max-w-4xl mx-auto">
+                     Türkiye'nin en kapsamlı 3PL lojistik platformu. ERP-WMS entegrasyonu ile depo yönetimi, 
+                     nakliye operasyonları, e-ticaret fulfillment, crossdock, AI destekli rota optimizasyonu, 
+                     gerçek zamanlı takip ve analitik raporlama. Tek platformda tüm lojistik süreçlerinizi 
+                     dijitalleştirin ve verimliliğinizi %40 artırın.
+                   </p>
+                   
+                   <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12 max-w-4xl mx-auto">
+                     <div className="text-center">
+                       <div className="text-3xl font-bold text-white mb-2">500+</div>
+                       <div className="text-white/70">Aktif Müşteri</div>
+                     </div>
+                     <div className="text-center">
+                       <div className="text-3xl font-bold text-white mb-2">50+</div>
+                       <div className="text-white/70">Araç Filosu</div>
+                     </div>
+                     <div className="text-center">
+                       <div className="text-3xl font-bold text-white mb-2">15+</div>
+                       <div className="text-white/70">Yıl Deneyim</div>
+                     </div>
+                     <div className="text-center">
+                       <div className="text-3xl font-bold text-white mb-2">24/7</div>
+                       <div className="text-white/70">Destek Hizmeti</div>
+                     </div>
+                   </div>
 
             {!isLoggedIn ? (
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -209,43 +230,115 @@ export default function HomePage() {
         </motion.div>
       )}
 
-      {/* Features Section */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-white mb-4">Özellikler</h2>
-          <p className="text-xl text-white/60">Modern teknoloji ile güçlendirilmiş</p>
-        </div>
+             {/* Services Section */}
+             <div className="container mx-auto px-4 py-16">
+               <div className="text-center mb-16">
+                 <h2 className="text-4xl font-bold text-white mb-4">Hizmetlerimiz</h2>
+                 <p className="text-xl text-white/60">Kapsamlı lojistik çözümleri</p>
+               </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {[
-            { icon: Star, title: 'Modern UI/UX', desc: 'Kullanıcı dostu arayüz' },
-            { icon: Shield, title: 'Güvenli', desc: 'End-to-end şifreleme' },
-            { icon: BarChart3, title: 'Analitik', desc: 'Gerçek zamanlı raporlar' },
-            { icon: Package, title: 'Entegre', desc: 'Tüm modüller bir arada' }
-          ].map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="text-center"
-            >
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <feature.icon className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
-              <p className="text-white/60">{feature.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+             {[
+               {
+                 icon: Warehouse,
+                 title: 'Depo Yönetimi (WMS)',
+                 desc: 'ERP entegreli depo operasyonları, FIFO/FEFO, lot takibi, crossdock, fulfillment',
+                 features: ['30.000 m² kapalı alan', 'Soğuk depo (-18°C)', 'Tehlikeli madde depolama', 'RFID & Barcode teknolojisi', 'AI destekli stok optimizasyonu']
+               },
+               {
+                 icon: Truck,
+                 title: 'Nakliye & Dağıtım (TMS)',
+                 desc: 'AI destekli rota optimizasyonu, gerçek zamanlı takip, multi-modal taşımacılık',
+                 features: ['50+ araç filosu', 'GPS & IoT takip', 'Milk-run rotalar', 'Konteyner taşımacılığı', 'Sürücü performans analizi']
+               },
+               {
+                 icon: Package,
+                 title: 'E-ticaret Fulfillment',
+                 desc: 'Trendyol, Amazon, Hepsiburada, GittiGidiyor entegrasyonu, otomatik sipariş işleme',
+                 features: ['Paketleme hizmeti', 'Otomatik etiketleme', 'Kargo entegrasyonu', 'İade yönetimi', 'Same-day delivery']
+               },
+               {
+                 icon: BarChart3,
+                 title: 'Raporlama & Analitik',
+                 desc: 'Gerçek zamanlı dashboard, AI destekli öngörüler, KPI takibi, maliyet optimizasyonu',
+                 features: ['KPI dashboard', 'Maliyet analizi', 'Müşteri raporları', 'AI destekli öngörüler', 'Predictive analytics']
+               },
+               {
+                 icon: Shield,
+                 title: 'Güvenlik & Kalite',
+                 desc: 'ISO sertifikaları, güvenlik protokolleri, veri şifreleme, audit trail',
+                 features: ['ISO 9001:2015', 'ISO 14001', 'OHSAS 18001', 'Güvenlik kameraları', 'AES-256 şifreleme']
+               },
+               {
+                 icon: Users,
+                 title: 'Müşteri Hizmetleri',
+                 desc: '7/24 destek, özel müşteri yöneticisi, WhatsApp entegrasyonu, SLA garantisi',
+                 features: ['Dedicated account manager', 'WhatsApp destek', 'Online portal', 'SLA garantisi', 'Proaktif bildirimler']
+               }
+             ].map((service, index) => (
+                   <motion.div
+                     key={index}
+                     initial={{ opacity: 0, y: 50 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     transition={{ duration: 0.6, delay: index * 0.1 }}
+                     className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 hover:bg-white/20 transition-all duration-300"
+                   >
+                     <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mb-4">
+                       <service.icon className="h-8 w-8 text-white" />
+                     </div>
+                     <h3 className="text-xl font-bold text-white mb-3">{service.title}</h3>
+                     <p className="text-white/70 mb-4">{service.desc}</p>
+                     <div className="space-y-2">
+                       {service.features.map((feature, idx) => (
+                         <div key={idx} className="flex items-center gap-2 text-white/80 text-sm">
+                           <CheckCircle className="h-4 w-4 text-green-400" />
+                           <span>{feature}</span>
+                         </div>
+                       ))}
+                     </div>
+                   </motion.div>
+                 ))}
+               </div>
+             </div>
 
-      {/* Footer */}
-      <div className="border-t border-white/10 py-8">
-        <div className="container mx-auto px-4 text-center text-white/60">
-          <p>&copy; 2024 Ayaz 3PL ERP. Tüm hakları saklıdır.</p>
-        </div>
-      </div>
+             {/* Features Section */}
+             <div className="container mx-auto px-4 py-16">
+               <div className="text-center mb-16">
+                 <h2 className="text-4xl font-bold text-white mb-4">Neden Ayaz Lojistik?</h2>
+                 <p className="text-xl text-white/60">Sektördeki liderliğimizin nedenleri</p>
+               </div>
+
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+             {[
+               { icon: Star, title: '15+ Yıl Deneyim', desc: 'Sektörde köklü geçmiş ve uzmanlık' },
+               { icon: Shield, title: 'Güvenilir Partner', desc: '500+ memnun müşteri, %99.5 SLA' },
+               { icon: BarChart3, title: 'Teknoloji Odaklı', desc: 'AI destekli operasyonlar, IoT entegrasyonu' },
+               { icon: Package, title: 'Entegre Çözüm', desc: 'Tek platform, tüm hizmetler, %40 verimlilik artışı' }
+             ].map((feature, index) => (
+                   <motion.div
+                     key={index}
+                     initial={{ opacity: 0, y: 50 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     transition={{ duration: 0.6, delay: index * 0.1 }}
+                     className="text-center"
+                   >
+                     <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                       <feature.icon className="h-8 w-8 text-white" />
+                     </div>
+                     <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
+                     <p className="text-white/60">{feature.desc}</p>
+                   </motion.div>
+                 ))}
+               </div>
+             </div>
+
+         {/* Footer */}
+         <div className="border-t border-white/10 py-8">
+           <div className="container mx-auto px-4 text-center text-white/60">
+             <p>&copy; 2024 Ayaz Lojistik 3PL ERP. Tüm hakları saklıdır.</p>
+             <p className="mt-2 text-sm">ERP-WMS-TMS Entegre Lojistik Platformu | ISO 9001:2015 Sertifikalı</p>
+           </div>
+         </div>
     </div>
   )
 }

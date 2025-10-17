@@ -43,10 +43,125 @@ export default function SalesPage() {
   const { user, logout, isLoading } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')
+  const [showNewProposal, setShowNewProposal] = useState(false)
+  const [newProposal, setNewProposal] = useState({
+    customer: '',
+    proposal: '',
+    value: '',
+    probability: 50,
+    description: '',
+    // Yeni alanlar
+    companyType: 'B2B',
+    contractDuration: 12,
+    monthlyFee: '',
+    perUnitFee: '',
+    discount: 0,
+    services: [],
+    specialConditions: '',
+    contactPerson: '',
+    phone: '',
+    email: '',
+    address: '',
+    city: '',
+    taxNumber: '',
+    creditLimit: '',
+    paymentTerms: '30',
+    // Teklif türü detayları
+    proposalType: '', // 'depo', 'nakliye', 'fulfillment', 'karma'
+    // Depo detayları
+    warehouseArea: '',
+    warehouseType: '', // 'normal', 'soğuk', 'tehlikeli'
+    storageMethod: '', // 'fifo', 'fefo', 'lifo'
+    handlingType: '', // 'manuel', 'otomatik', 'yarı-otomatik'
+    crossdock: false,
+    // Nakliye detayları
+    transportType: '', // 'mikro', 'kargo', 'paletli', 'full_arac'
+    vehicleType: '', // 'kamyon', 'tır', 'van', 'konteyner'
+    routeType: '', // 'şehir_içi', 'şehirler_arası', 'uluslararası'
+    // Fulfillment detayları
+    fulfillmentType: '', // 'e_ticaret', 'b2b', 'karma'
+    packaging: false,
+    labeling: false,
+    returnManagement: false
+  })
 
   const handleLogout = () => {
     logout()
     window.location.href = '/login'
+  }
+
+  const handleNewProposal = () => {
+    // Boş form ile başla
+    setNewProposal({
+      customer: '',
+      proposal: '',
+      value: '',
+      probability: 50,
+      description: '',
+      companyType: 'B2B',
+      contractDuration: 12,
+      monthlyFee: '',
+      perUnitFee: '',
+      discount: 0,
+      services: [],
+      specialConditions: '',
+      contactPerson: '',
+      phone: '',
+      email: '',
+      address: '',
+      city: '',
+      taxNumber: '',
+      creditLimit: '',
+      paymentTerms: '30',
+      // Teklif türü detayları
+      proposalType: '',
+      // Depo detayları
+      warehouseArea: '',
+      warehouseType: '',
+      storageMethod: '',
+      handlingType: '',
+      crossdock: false,
+      // Nakliye detayları
+      transportType: '',
+      vehicleType: '',
+      routeType: '',
+      // Fulfillment detayları
+      fulfillmentType: '',
+      packaging: false,
+      labeling: false,
+      returnManagement: false
+    })
+    setShowNewProposal(true)
+  }
+
+  const handleSaveProposal = () => {
+    // Burada gerçek API çağrısı yapılacak
+    console.log('Yeni teklif kaydediliyor:', newProposal)
+    setShowNewProposal(false)
+    setNewProposal({
+      customer: '',
+      proposal: '',
+      value: '',
+      probability: 50,
+      description: '',
+      companyType: 'B2B',
+      contractDuration: 12,
+      monthlyFee: '',
+      perUnitFee: '',
+      discount: 0,
+      services: [],
+      specialConditions: '',
+      contactPerson: '',
+      phone: '',
+      email: '',
+      address: '',
+      city: '',
+      taxNumber: '',
+      creditLimit: '',
+      paymentTerms: '30'
+    })
+    // Başarı mesajı göster
+    alert('Teklif başarıyla kaydedildi!')
   }
 
   const salesStats = [
@@ -346,7 +461,12 @@ export default function SalesPage() {
                           Müşteri teklifleri ve durumları
                         </CardDescription>
                       </div>
-                      <Button variant="outline" size="sm" className="hover:bg-white/50">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="hover:bg-white/50"
+                        onClick={handleNewProposal}
+                      >
                         <Plus className="h-4 w-4 mr-2" />
                         Yeni Teklif
                       </Button>
@@ -550,6 +670,492 @@ export default function SalesPage() {
           </div>
         </main>
       </div>
+
+      {/* Yeni Teklif Modal - Profesyonel Tasarım */}
+      {showNewProposal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="bg-white rounded-3xl w-full max-w-6xl mx-auto shadow-2xl border border-gray-100 overflow-hidden"
+          >
+            {/* Header - Profesyonel */}
+            <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 p-8 text-white relative overflow-hidden">
+              <div className="absolute inset-0 bg-black/10"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12"></div>
+              
+              <div className="relative z-10 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                    <FileText className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-bold">Profesyonel Teklif Hazırlama</h2>
+                    <p className="text-blue-100 text-lg">Ayaz Lojistik - 3PL Hizmetleri</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => setShowNewProposal(false)}
+                  className="hover:bg-white/20 text-white border border-white/30"
+                >
+                  <span className="text-2xl">×</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Content - Scrollable */}
+            <div className="max-h-[80vh] overflow-y-auto">
+              <div className="p-8 space-y-8">
+                {/* Teklif Türü Seçimi - Premium Tasarım */}
+                <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-8 shadow-lg">
+                  <div className="text-center mb-8">
+                    <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-xl">
+                      <Target className="h-10 w-10 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Hangi Hizmet Türü İçin Teklif Hazırlıyoruz?</h3>
+                    <p className="text-gray-600">Müşterinizin ihtiyacına göre en uygun çözümü seçin</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {[
+                      { 
+                        id: 'depo', 
+                        name: 'Depo Hizmetleri', 
+                        icon: Warehouse, 
+                        color: 'from-blue-500 to-cyan-500',
+                        description: 'Depo kiralama, stok yönetimi, FIFO/FEFO',
+                        features: ['Depo Kiralama', 'Stok Yönetimi', 'Crossdock', 'Elleçleme']
+                      },
+                      { 
+                        id: 'nakliye', 
+                        name: 'Nakliye Hizmetleri', 
+                        icon: Truck, 
+                        color: 'from-green-500 to-emerald-500',
+                        description: 'Mikro dağıtım, kargo, paletli, full araç',
+                        features: ['Mikro Dağıtım', 'Kargo', 'Paletli', 'Full Araç']
+                      },
+                      { 
+                        id: 'fulfillment', 
+                        name: 'Fulfillment', 
+                        icon: Package, 
+                        color: 'from-orange-500 to-red-500',
+                        description: 'E-ticaret, B2B, paketleme, etiketleme',
+                        features: ['E-ticaret', 'B2B', 'Paketleme', 'Etiketleme']
+                      },
+                      { 
+                        id: 'karma', 
+                        name: 'Karma Çözüm', 
+                        icon: BarChart3, 
+                        color: 'from-purple-500 to-pink-500',
+                        description: 'Depo + Nakliye + Fulfillment entegrasyonu',
+                        features: ['Entegre Çözüm', 'End-to-End', 'Optimizasyon', 'AI Destekli']
+                      }
+                    ].map((type) => (
+                      <motion.label 
+                        key={type.id}
+                        whileHover={{ scale: 1.05, y: -5 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`relative cursor-pointer group ${
+                          newProposal.proposalType === type.id 
+                            ? 'ring-4 ring-blue-500 ring-opacity-50' 
+                            : ''
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="proposalType"
+                          value={type.id}
+                          checked={newProposal.proposalType === type.id}
+                          onChange={(e) => setNewProposal({...newProposal, proposalType: e.target.value})}
+                          className="sr-only"
+                        />
+                        <div className={`p-6 rounded-2xl border-2 transition-all duration-300 ${
+                          newProposal.proposalType === type.id 
+                            ? 'border-blue-500 bg-blue-50 shadow-xl' 
+                            : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-lg'
+                        }`}>
+                          <div className={`w-16 h-16 bg-gradient-to-r ${type.color} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                            <type.icon className="h-8 w-8 text-white" />
+                          </div>
+                          <h4 className="text-lg font-bold text-gray-900 text-center mb-2">{type.name}</h4>
+                          <p className="text-sm text-gray-600 text-center mb-4">{type.description}</p>
+                          <div className="space-y-1">
+                            {type.features.map((feature, idx) => (
+                              <div key={idx} className="flex items-center gap-2 text-xs text-gray-600">
+                                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                                <span>{feature}</span>
+                              </div>
+                            ))}
+                          </div>
+                          {newProposal.proposalType === type.id && (
+                            <div className="absolute top-4 right-4 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                              <CheckCircle className="h-4 w-4 text-white" />
+                            </div>
+                          )}
+                        </div>
+                      </motion.label>
+                    ))}
+                  </div>
+                </div>
+
+              {/* Müşteri Bilgileri */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Building className="h-5 w-5 text-blue-600" />
+                  Müşteri Bilgileri
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Şirket Adı *
+                    </label>
+                    <Input
+                      value={newProposal.customer}
+                      onChange={(e) => setNewProposal({...newProposal, customer: e.target.value})}
+                      placeholder="Şirket adını girin"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Şirket Tipi
+                    </label>
+                    <select
+                      value={newProposal.companyType}
+                      onChange={(e) => setNewProposal({...newProposal, companyType: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="B2B">B2B - Kurumsal</option>
+                      <option value="B2C">B2C - Bireysel</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      İletişim Kişisi
+                    </label>
+                    <Input
+                      value={newProposal.contactPerson}
+                      onChange={(e) => setNewProposal({...newProposal, contactPerson: e.target.value})}
+                      placeholder="İletişim kişisi adı"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Telefon
+                    </label>
+                    <Input
+                      value={newProposal.phone}
+                      onChange={(e) => setNewProposal({...newProposal, phone: e.target.value})}
+                      placeholder="+90 212 555 0123"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      E-posta
+                    </label>
+                    <Input
+                      value={newProposal.email}
+                      onChange={(e) => setNewProposal({...newProposal, email: e.target.value})}
+                      placeholder="ornek@email.com"
+                      type="email"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Vergi No
+                    </label>
+                    <Input
+                      value={newProposal.taxNumber}
+                      onChange={(e) => setNewProposal({...newProposal, taxNumber: e.target.value})}
+                      placeholder="1234567890"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Teklif Detayları */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-green-600" />
+                  Teklif Detayları
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Teklif Başlığı *
+                    </label>
+                    <Input
+                      value={newProposal.proposal}
+                      onChange={(e) => setNewProposal({...newProposal, proposal: e.target.value})}
+                      placeholder="Teklif başlığını girin"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sözleşme Süresi (ay)
+                    </label>
+                    <Input
+                      value={newProposal.contractDuration}
+                      onChange={(e) => setNewProposal({...newProposal, contractDuration: parseInt(e.target.value)})}
+                      placeholder="12"
+                      type="number"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Toplam Değer (₺) *
+                    </label>
+                    <Input
+                      value={newProposal.value}
+                      onChange={(e) => setNewProposal({...newProposal, value: e.target.value})}
+                      placeholder="0"
+                      type="number"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Başarı Oranı (%)
+                    </label>
+                    <Input
+                      value={newProposal.probability}
+                      onChange={(e) => setNewProposal({...newProposal, probability: parseInt(e.target.value)})}
+                      placeholder="50"
+                      type="number"
+                      min="0"
+                      max="100"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Aylık Sabit Ücret (₺)
+                    </label>
+                    <Input
+                      value={newProposal.monthlyFee}
+                      onChange={(e) => setNewProposal({...newProposal, monthlyFee: e.target.value})}
+                      placeholder="0"
+                      type="number"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Birim Ücret (₺)
+                    </label>
+                    <Input
+                      value={newProposal.perUnitFee}
+                      onChange={(e) => setNewProposal({...newProposal, perUnitFee: e.target.value})}
+                      placeholder="0.00"
+                      type="number"
+                      step="0.01"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Hizmetler ve Özel Koşullar */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Award className="h-5 w-5 text-purple-600" />
+                  Hizmetler ve Koşullar
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Teklif Açıklaması
+                    </label>
+                    <textarea
+                      value={newProposal.description}
+                      onChange={(e) => setNewProposal({...newProposal, description: e.target.value})}
+                      placeholder="Teklif detaylarını açıklayın..."
+                      className="w-full h-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Özel Koşullar
+                    </label>
+                    <textarea
+                      value={newProposal.specialConditions}
+                      onChange={(e) => setNewProposal({...newProposal, specialConditions: e.target.value})}
+                      placeholder="Özel koşullar ve indirimler..."
+                      className="w-full h-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Adres Bilgileri */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Building className="h-5 w-5 text-indigo-600" />
+                  Adres Bilgileri
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Adres
+                    </label>
+                    <Input
+                      value={newProposal.address}
+                      onChange={(e) => setNewProposal({...newProposal, address: e.target.value})}
+                      placeholder="Tam adres bilgisi"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Şehir
+                    </label>
+                    <Input
+                      value={newProposal.city}
+                      onChange={(e) => setNewProposal({...newProposal, city: e.target.value})}
+                      placeholder="İstanbul"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Kredi Limiti (₺)
+                    </label>
+                    <Input
+                      value={newProposal.creditLimit}
+                      onChange={(e) => setNewProposal({...newProposal, creditLimit: e.target.value})}
+                      placeholder="0"
+                      type="number"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Hizmet Seçimi */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Package className="h-5 w-5 text-orange-600" />
+                  Hizmet Seçimi
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { id: 'depo', name: 'Depo Kiralama', icon: Warehouse },
+                    { id: 'nakliye', name: 'Nakliye', icon: Truck },
+                    { id: 'fulfillment', name: 'Fulfillment', icon: Package },
+                    { id: 'crossdock', name: 'Crossdock', icon: BarChart3 }
+                  ].map((service) => (
+                    <label key={service.id} className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={newProposal.services.includes(service.name)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setNewProposal({...newProposal, services: [...newProposal.services, service.name]})
+                          } else {
+                            setNewProposal({...newProposal, services: newProposal.services.filter(s => s !== service.name)})
+                          }
+                        }}
+                        className="w-4 h-4 text-blue-600"
+                      />
+                      <service.icon className="h-5 w-5 text-gray-600" />
+                      <span className="text-sm font-medium">{service.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Ödeme Koşulları */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                  Ödeme Koşulları
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Ödeme Vadesi (gün)
+                    </label>
+                    <select
+                      value={newProposal.paymentTerms}
+                      onChange={(e) => setNewProposal({...newProposal, paymentTerms: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="0">Peşin</option>
+                      <option value="15">15 Gün</option>
+                      <option value="30">30 Gün</option>
+                      <option value="45">45 Gün</option>
+                      <option value="60">60 Gün</option>
+                      <option value="90">90 Gün</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      İndirim Oranı (%)
+                    </label>
+                    <Input
+                      value={newProposal.discount}
+                      onChange={(e) => setNewProposal({...newProposal, discount: parseInt(e.target.value)})}
+                      placeholder="0"
+                      type="number"
+                      min="0"
+                      max="100"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Butonlar */}
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-200">
+                <div className="flex items-center gap-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowNewProposal(false)}
+                    className="hover:bg-gray-50"
+                  >
+                    <span className="mr-2">←</span>
+                    İptal
+                  </Button>
+                  <Button 
+                    onClick={handleSaveProposal}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Taslak Kaydet
+                  </Button>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <Button 
+                    onClick={() => window.print()}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    PDF İndir
+                  </Button>
+                  <Button 
+                    onClick={handleSaveProposal}
+                    className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-bold px-6 py-3"
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    Teklif Gönder
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
     </ProtectedRoute>
   )
