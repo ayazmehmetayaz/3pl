@@ -105,10 +105,10 @@ export default function HomePage() {
 
             <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
               Ayaz Lojistik
-            </h1>
+        </h1>
             <p className="text-2xl text-white/80 mb-8">
-              Lojistik Entegre Yönetim Sistemi
-            </p>
+          Lojistik Entegre Yönetim Sistemi
+        </p>
                    <p className="text-lg text-white/60 mb-8 max-w-4xl mx-auto">
                      Türkiye'nin en kapsamlı 3PL lojistik platformu. ERP-WMS entegrasyonu ile depo yönetimi, 
                      nakliye operasyonları, e-ticaret fulfillment, crossdock, AI destekli rota optimizasyonu, 
@@ -338,7 +338,7 @@ export default function HomePage() {
              <p>&copy; 2024 Ayaz Lojistik 3PL ERP. Tüm hakları saklıdır.</p>
              <p className="mt-2 text-sm">ERP-WMS-TMS Entegre Lojistik Platformu | ISO 9001:2015 Sertifikalı</p>
            </div>
-         </div>
+      </div>
     </div>
   )
 }

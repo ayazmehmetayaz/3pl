@@ -26,10 +26,10 @@ export default function LoginPage() {
     setTimeout(() => {
       setIsLoading(false)
       if (formData.email && formData.password) {
-        window.location.href = '/dashboard'
-      } else {
+      window.location.href = '/dashboard'
+    } else {
         setError('Geçersiz email veya şifre')
-      }
+    }
     }, 1000)
   }
 
