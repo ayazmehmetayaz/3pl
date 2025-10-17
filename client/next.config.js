@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // experimental: {
-  //   appDir: true, // Next.js 14'te artık gerekli değil
-  // },
+  // Static export for GitHub Pages
+  output: 'export',
+  trailingSlash: true,
   
   // Vercel optimizations
   compress: true,
@@ -11,6 +11,7 @@ const nextConfig = {
   
   // Image optimization
   images: {
+    unoptimized: true,
     domains: ['images.unsplash.com', 'localhost', 'vercel.app'],
     formats: ['image/webp', 'image/avif'],
   },
