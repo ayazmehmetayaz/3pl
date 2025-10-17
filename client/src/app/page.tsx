@@ -105,10 +105,10 @@ export default function HomePage() {
 
             <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
               Ayaz 3PL ERP
-            </h1>
+        </h1>
             <p className="text-2xl text-white/80 mb-8">
-              Lojistik Entegre Yönetim Sistemi
-            </p>
+          Lojistik Entegre Yönetim Sistemi
+        </p>
             <p className="text-lg text-white/60 mb-12 max-w-3xl mx-auto">
               Depo, taşıma, finans, insan kaynakları ve raporlama modüllerini tek platformda yönetin.
               Modern, hızlı ve güvenli ERP çözümü.
@@ -129,7 +129,7 @@ export default function HomePage() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => window.location.href = '/login'}
+          onClick={() => window.location.href = '/login'}
                   className="bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold py-4 px-8 text-xl rounded-xl hover:bg-white/20 transition-all duration-300"
                 >
                   Normal Giriş
