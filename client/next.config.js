@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Static export for GitHub Pages
-  output: 'export',
+  // Vercel deployment configuration
   trailingSlash: true,
   
   // Vercel optimizations

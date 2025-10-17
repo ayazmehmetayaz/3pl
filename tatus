@@ -1,0 +1,20 @@
+[33mc9ed999[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Add GitHub Pages deployment and static export
+[33mb0d757b[m Fix Vercel build configuration - only build client
+[33m7d96b52[m Add Vercel configuration files
+[33mdb868d1[m Fix sales page JSX syntax and add missing imports
+[33m89eea6a[m Server route hatası düzeltildi - Test için basitleştirildi
+[33ma20fe0d[m Yeni modüller eklendi: Hukuk, Eğitim, Medya, Teknik Servis, Güvenlik - Tam entegre ERP sistemi tamamlandı
+[33me86e4dc[m ilk commit
+[33m45db406[m Son güncellemeler - Premium teklif tasarımı tamamlandı
+[33m1965ddf[m Premium teklif tasarımı - Müşteriye ilk yüzümüz hazır
+[33ma70b563[m Admin ve Sales modülleri eklendi, server hataları düzeltildi
+[33mcf28ad8[m Ana sayfa başlığı düzeltildi - Ayaz Lojistik olarak değiştirildi
+[33mc9dc695[m Server authController hatası düzeltildi
+[33m306f8c8[m Build hatası düzeltildi
+[33md9d96fa[m Tanıtım sayfası eklendi - Tek sayfadan tüm modülleri kontrol etme özelliği
+[33m7304e7e[m Server hatalarını düzelt - validateRequest ve authSchemas import'larını kaldır
+[33mcc6aad5[m ERP sistemi güncellemeleri: UI iyileştirmeleri, yeni bileşenler ve mobil uygulamalar eklendi
+[33med1b5d2[m Fix: TypeScript export type error
+[33mb49c82c[m Fix: Add missing Settings import in ThemeEditor
+[33m22724fa[m Fix: Replace Ant Design LoadingSpinner with Tailwind CSS version
+[33mc9eafc4[m Fix: Duplicate type property in TMS page
